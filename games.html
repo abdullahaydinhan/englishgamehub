@@ -1,34 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Games | English Teacher's Game Hub</title>
-  <link rel="stylesheet" href="assets/style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Game Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563eb;
+  --light: #f8fafc;
+  --dark: #0f172a;
+}
+body {
+  margin:0; font-family:Poppins,sans-serif;
+  background:var(--light); color:var(--dark);
+}
+header {
+  background:var(--blue); color:#fff; padding:10px 24px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+header h1 { margin:0; font-size:20px; }
+nav a { color:#fff; margin-left:16px; text-decoration:none; font-weight:600; }
+nav a:hover { text-decoration:underline; }
+main { padding:40px 20px; max-width:800px; margin:auto; }
+h2 { margin-bottom:14px; }
+ul { list-style:none; padding:0; }
+li {
+  margin:6px 0; background:white; padding:10px 14px;
+  border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,.1);
+  display:flex; align-items:center; justify-content:space-between;
+}
+li span { font-weight:700; }
+li a { color:var(--blue); text-decoration:none; }
+li a:hover { text-decoration:underline; }
+footer {
+  background:#1e3a8a; color:white; text-align:center; padding:10px 0; margin-top:40px;
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>🎮 Game Center</h1>
-    <nav id="navbar">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="games.html" class="active">Games</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </header>
 
-  <main class="info">
-    <h2>Available Games</h2>
-    <ul>
-      <li><a href="games/wordquiz.html">🧩 Word Quiz</a></li>
-      <li><a href="games/matching.html">🧠 Matching Game</a></li>
-      <li><a href="games/speaking.html">🎤 Speaking Practice</a></li>
-    </ul>
-    <p>More games coming soon! Each is designed for both PC and smartboard use.</p>
-  </main>
+<header>
+  <h1>🎮 Game Center</h1>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../about.html">About</a>
+    <a href="games.html">Games</a>
+    <a href="../contact.html">Contact</a>
+  </nav>
+</header>
 
-  <footer>
-    <p>© 2025 English Teacher’s Game Hub</p>
-  </footer>
+<main>
+  <h2>Available Games</h2>
+  <ul id="gameList">
+    <li>🔄 Loading games...</li>
+  </ul>
+  <p style="opacity:0.7">New games are automatically detected — no need to edit this file manually.</p>
+</main>
+
+<footer>
+  © 2025 English Teacher’s Game Hub | Designed with ❤️ for students
+</footer>
+
+<script>
+// ✅ Oyunları otomatik listele
+async function loadGames() {
+  const gameList = document.getElementById("gameList");
+  try {
+    // games klasörünün içeriğini al
+    const res = await fetch('./');
+    const text = await res.text();
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(text, 'text/html');
+    const links = [...htmlDoc.querySelectorAll('a')];
+    
+    const gameDirs = links
+      .map(a => a.getAttribute('href'))
+      .filter(h => h && h.endsWith('/') && h !== '../')
+      .filter(h => !h.includes('assets/') && !h.includes('css/') && !h.includes('js/'));
+
+    if (gameDirs.length === 0) {
+      gameList.innerHTML = "<li>⚠️ No games found yet. Add a folder under <b>games/</b>.</li>";
+      return;
+    }
+
+    gameList.innerHTML = "";
+    gameDirs.forEach(dir => {
+      const name = decodeURIComponent(dir.replace(/\/$/,''));
+      const emoji = name.match(/milyoner/i) ? "💰" :
+                    name.match(/word/i) ? "🧩" :
+                    name.match(/match/i) ? "🧠" :
+                    name.match(/speak/i) ? "🎤" : "🎮";
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${emoji}</span> <a href="${dir}">${name}</a>`;
+      gameList.appendChild(li);
+    });
+
+  } catch (err) {
+    gameList.innerHTML = "<li>❌ Error loading game list.</li>";
+    console.error(err);
+  }
+}
+
+loadGames();
+</script>
 </body>
 </html>

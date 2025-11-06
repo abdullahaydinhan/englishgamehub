@@ -1,6 +1,5 @@
 [
-  { "name": "Milyoner 9.1", "path": "games/Milyoner9_1/", "emoji": "💰" },
-  { "name": "Word Quiz", "path": "games/WordQuiz/", "emoji": "🧩" },
-  { "name": "Matching Game", "path": "games/MatchingGame/", "emoji": "🧠" },
-  { "name": "Speaking Practice", "path": "games/SpeakingPractice/", "emoji": "🎤" }
+  { "name": "Milyoner 9.1", "path": "games/Milyoner9_1/", "emoji": "💰" }
+
 ]
+

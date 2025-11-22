@@ -30,7 +30,7 @@
             color: white; text-decoration: none; padding: 10px 15px; margin-left: 10px;
             transition: background-color 0.3s; border-radius: 5px;
         }
-        /* nav linkleri için yeni aktif stil */
+        /* Navigasyon Aktif Stili */
         nav a.active-link, nav a:hover { background-color: var(--accent-hover-color); }
         
         /* Hero Section */
@@ -73,19 +73,18 @@
 
         .game-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
 
-        /* **FARKLI KLASÖR TİPLERİ İÇİN FARKLI STİL UYGULAMA** */
-        .card-activity {
-            /* Interactive_Activities Klasöründen gelenler (Mavi Tema) */
-            border: 3px solid #3498db; 
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-        }
+        /* Games Kartı */
         .card-game {
-            /* Games Klasöründen gelenler (Kırmızı Tema) */
             border: 3px solid var(--accent-color); 
             box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3);
             background-color: #fff8f8; 
         }
-        /* -------------------------------------------------- */
+        /* Interactive Activities Kartı */
+        .card-activity {
+            border: 3px solid #3498db; 
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            background-color: #f8fbff; /* Farklı hafif arka plan */
+        }
 
         .game-card h3 { color: var(--primary-color); margin-bottom: 10px; font-size: 1.4rem; }
         .game-card p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
@@ -113,7 +112,7 @@
     <header>
         <h1>🎓 English Teacher's Game Hub</h1>
         <nav id="navbar">
-            <a href="#" id="nav-home" class="active-link">Home</a>
+            <a href="#" id="nav-home" class="active-link" data-filter="All">Home</a>
             <a href="#games" id="nav-games" data-filter="Games">Games</a>
             <a href="#activities" id="nav-activities" data-filter="Interactive_Activities">Interactive Activities</a> 
             <a href="about.html">About</a>
@@ -129,7 +128,7 @@
         </section>
 
         <section id="all-content-container">
-            <h2 style="text-align: center; color: var(--primary-color); padding-top: 20px;">🔥 Content by Grade Level</h2>
+            <h2 style="text-align: center; color: var(--primary-color); padding-top: 20px;">🔥 All Content by Grade Level</h2>
             
             <p style="text-align:center; color:#999; padding:20px;" id="loading-message">İçerikler yükleniyor... Lütfen bekleyin.</p>
         </section>
@@ -152,7 +151,7 @@
     // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
     const SOURCE_FOLDERS = ["Games", "Interactive_Activities"]; 
     
-    // DÜZELTİLMİŞ: Sınıf adları Sizin son teyidinize göre (TÜMÜ BÜYÜK HARF)
+    // Sınıf adları Sizin son teyidinize göre (TÜMÜ BÜYÜK HARF)
     const GRADE_LEVELS = ["9TH_GRADE", "10TH_GRADE", "11TH_GRADE", "12TH_GRADE"]; 
     
     const allContentContainer = document.getElementById('all-content-container');
@@ -165,17 +164,17 @@
     // Lütfen buradaki anahtarları GitHub'daki gerçek dosya/klasör adlarıyla eşleştirin.
     const customGameDetails = {
         // Interactive Activities (TAM DOSYA ADI)
-        "9.1.R. Land of Fire PAGE 30.html": { title: "Land of Fire Reading (Page 30)", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan okuma anlama pratiği.", badgeColor: "#f39c12" },
-        "9.1.R. Getting Ready for a Safer Digital World Page 34.html": { title: "Safer Digital World (Page 34)", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
-        "9.1.R. Somewhere Far Away PAGE 32.html": { title: "Somewhere Far Away Reading", level: "9. Sınıf Aktivitesi", desc: "Şili ile ilgili okuma ve anlama pratiği.", badgeColor: "#00b894" },
+        "9.1.R. Land of Fire PAGE 30.html": { title: "Land of Fire Reading (Page 30)", level: "Azerbaijan Activity", desc: "Azerbaycan okuma anlama pratiği.", badgeColor: "#f39c12" },
+        "9.1.R. Getting Ready for a Safer Digital World Page 34.html": { title: "Safer Digital World (Page 34)", level: "Cybersecurity Quiz", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
+        "9.1.R. Somewhere Far Away PAGE 32.html": { title: "Somewhere Far Away Reading", level: "Chile Activity", desc: "Şili ile ilgili okuma ve anlama pratiği.", badgeColor: "#00b894" },
         
         // Games (KLASÖR ADI uzantısız)
-        "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Sınav", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
-        "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Hızlı Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
+        "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Knowledge Quiz", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
+        "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Quick Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
     };
 
     /**
-     * Belirtilen GitHub klasöründen içerikleri çeker.
+     * GitHub API'sinden içerikleri çeker.
      */
     async function fetchFolderContent(sourceFolder, gradeFolder) {
         const fullPath = `${sourceFolder}/${gradeFolder}`;
@@ -211,8 +210,8 @@
             const results = await Promise.all(fetchPromises);
             globalAllData = results.flat(); 
             
-            // Başlangıçta sadece "Games" içeriğini göster
-            displayContent('Games'); 
+            // Başlangıçta 'All' (Tüm içerikleri) göster
+            displayContent('All'); 
 
         } catch (error) {
             console.error('İçerikler yüklenirken hata oluştu:', error);
@@ -223,49 +222,49 @@
     }
 
     /**
-     * Belirtilen kaynağa (Games/Interactive_Activities) göre içerikleri filtreler ve gösterir.
+     * Belirtilen kaynağa göre içerikleri filtreler ve gösterir.
      */
     function displayContent(filterSource) {
-        // Başlık güncellemeleri
         const mainTitle = document.getElementById('content-hero-title');
         const contentHeader = document.querySelector('#all-content-container h2');
+        let displayData = globalAllData;
 
+        // Başlık güncellemeleri
         if (filterSource === 'Games') {
             mainTitle.textContent = "Welcome to Your Game Hub!";
             contentHeader.textContent = "🎮 Games by Grade Level";
+            displayData = globalAllData.filter(item => item.sourceFolder === 'Games');
         } else if (filterSource === 'Interactive_Activities') {
             mainTitle.textContent = "Welcome to Interactive Activities!";
             contentHeader.textContent = "🧠 Interactive Activities by Grade Level";
-        } else {
+            displayData = globalAllData.filter(item => item.sourceFolder === 'Interactive_Activities');
+        } else { // 'All' veya 'Home'
             mainTitle.textContent = "Welcome to Your Learning Playground!";
-            contentHeader.textContent = "🔥 Content by Grade Level";
+            contentHeader.textContent = "🔥 All Content by Grade Level";
         }
-        
-        // 1. Filtreleme
-        const filteredData = globalAllData.filter(item => item.sourceFolder === filterSource);
         
         allContentContainer.innerHTML = '';
         allContentContainer.appendChild(contentHeader); // Ana başlığı tekrar ekle
 
-        if (filteredData.length === 0) {
+        if (displayData.length === 0 && filterSource !== 'All') {
             allContentContainer.innerHTML += `<p style="text-align:center; color:#999; padding:20px;">Bu kategoride henüz listelenecek içerik bulunamadı.</p>`;
             return;
         }
+
+        // Gruplama ve Sıralama
+        displayData.sort((a, b) => b.name.localeCompare(a.name)); 
         
-        // 2. Gruplama
-        filteredData.sort((a, b) => b.name.localeCompare(a.name)); 
-        
-        const groupedData = filteredData.reduce((acc, item) => {
+        const groupedData = displayData.reduce((acc, item) => {
             acc[item.gradeFolder] = acc[item.gradeFolder] || [];
             acc[item.gradeFolder].push(item);
             return acc;
         }, {});
 
-        // 3. Gösterim
+        // Gösterim
         GRADE_LEVELS.forEach(grade => {
             const gradeItems = groupedData[grade];
             
-            // İSTEK 3: Veri yoksa sınıf başlığını LİSTELEME
+            // İSTEK 4: Veri yoksa sınıf başlığını LİSTELEME
             if (!gradeItems || gradeItems.length === 0) return; 
 
             // Sınıf Başlığını Oluştur
@@ -283,7 +282,7 @@
                 let gameUrl = "";
                 let sourceFolder = item.sourceFolder;
                 
-                // URL belirleme ve Filtreleme (Tekrar Filtreleme Gerekli: Sadece dir/html)
+                // URL belirleme ve Filtreleme (Sadece dir/html)
                 if (sourceFolder === "Games" && item.type === 'dir') {
                     gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
                 } 
@@ -293,7 +292,7 @@
                     return; // Liste dışı kalanları atla
                 }
 
-                // Varsayılan Değerler
+                // Varsayılan Değerler ve İSTEK 2-3 (Varsayılan Rozet Başlıkları)
                 let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
                 let desc = "";
                 let level = "";
@@ -301,11 +300,11 @@
                 let cardClass = ""; 
 
                 if (sourceFolder === "Games") {
-                    level = "Game"; // İSTEK 4: Başlık Games olsun
+                    level = "Games"; // İSTEK 2: Games klasöründeki varsayılan başlık
                     desc = "An interactive game from the sub-directory.";
                     cardClass = "card-game";
                 } else if (sourceFolder === "Interactive_Activities") {
-                    level = "Interactive Activity"; // İSTEK 4: Başlık Interactive Activity olsun
+                    level = "Interactive Activities"; // İSTEK 3: Activities klasöründeki varsayılan başlık
                     desc = "A reading or vocabulary practice session.";
                     cardClass = "card-activity"; 
                 }
@@ -322,7 +321,7 @@
                     const details = customGameDetails[lookupKey];
                     title = details.title;
                     desc = details.desc;
-                    level = details.level;
+                    level = details.level; // Custom level kullanılır
                     if (details.badgeColor) {
                         badgeStyle = `background: ${details.badgeColor};`;
                     }
@@ -360,25 +359,16 @@
 
             const filter = e.target.getAttribute('data-filter');
             
-            // Filtre varsa içeriği göster, yoksa (Home butonu) Games içeriğini göster
-            displayContent(filter || 'Games');
+            // Filtre varsa içeriği göster, yoksa (Home butonu) All içeriğini göster
+            displayContent(filter || 'All');
         });
     });
 
-    // Sayfa yüklendiğinde tüm içerikleri çek ve varsayılan olarak Games'i göster
+    // Sayfa yüklendiğinde tüm içerikleri çek ve varsayılan olarak All'u göster
     document.addEventListener('DOMContentLoaded', () => {
         loadAllContent();
-        
-        // Home'u Games ile aynı yapma isteği için:
-        document.getElementById('nav-home').addEventListener('click', (e) => {
-             e.preventDefault();
-             document.querySelectorAll('#navbar a').forEach(nav => nav.classList.remove('active-link'));
-             e.target.classList.add('active-link');
-             displayContent('Games');
-        });
-
-        // 'Content' linki yerine Games gösterileceği için 'Home' ve 'Games' aktif olmalı.
-        document.getElementById('nav-games').classList.add('active-link');
+        // Sayfa yüklendiğinde Home butonunu aktif yapar (varsayılan 'All')
+        document.getElementById('nav-home').classList.add('active-link');
     });
 </script>
 

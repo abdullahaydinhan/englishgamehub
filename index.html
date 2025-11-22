@@ -86,12 +86,12 @@
         margin: 0 auto;
     }
 
-    /* Oyun Kartı Tasarımı */
+    /* Oyun Kartı Temel Tasarımı */
     .game-card {
         background: #ffffff;
         border-radius: 15px;
         padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         text-align: center;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: 1px solid #eee;
@@ -103,8 +103,22 @@
     .game-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        border-color: var(--accent-color);
     }
+
+    /* YENİ STİL İSTEĞİ: FARKLI KENARLIK VE ARKA PLANLAR */
+    .card-activity {
+        /* games/ içindeki tek HTML dosyaları (Interactive Activity) */
+        border: 3px solid #3498db; /* Mavi Kenarlık */
+        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    .card-game {
+        /* games/klasor/ içindeki oyunlar (Game) */
+        border: 3px solid var(--accent-color); /* Kırmızı Kenarlık */
+        box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3);
+        background-color: #fff8f8; /* Hafif pembe arka plan */
+    }
+    /* --- BİTTİ --- */
 
     .game-card h3 {
         color: var(--primary-color);
@@ -208,20 +222,17 @@
 
 <script>
   // --- AYARLAR ---
-  // KENDİ GİTHUB BİLGİLERİNİZİ BURAYA YAZIN
   const username = "hunter5234";
   const repo = "english-game-hub";
-  const folder = "games"; // Oyunların olduğu ana klasör
+  const folder = "games"; 
 
   // --- ÖZEL OYUN BİLGİLERİ ---
-  // Buraya oyunlarınızın dosya adını/klasör adını yazarak özelleştirebilirsiniz.
   const customGameDetails = {
-      // Örnek Dosyalar (Dosya adı .html ile bitmeli)
       "azerbaijan.html": {
           title: "Land of Fire (Azerbaijan)",
           level: "Level: A2",
           desc: "Learn about the geography, culture, and history of Azerbaijan.",
-          badgeColor: "#f39c12" // Sarı
+          badgeColor: "#f39c12" 
       },
       "chile.html": {
           title: "Somewhere Far Away (Chile)",
@@ -233,20 +244,19 @@
           title: "Safer Digital World",
           level: "Level: A2",
           desc: "Cybersecurity vocabulary and reading practice. Stay safe online!",
-          badgeColor: "#e94560" // Kırmızı
+          badgeColor: "#e94560" 
       },
-      // Örnek Klasörler (Klasör adı tam olarak yazılmalı, index.html içeriyor olmalı)
       "Milyoner9_1": { 
           title: "Who Wants to Be a Millionaire?",
           level: "Level: B1",
           desc: "Test your general knowledge with this fun quiz game!",
-          badgeColor: "#27ae60" // Yeşil
+          badgeColor: "#27ae60" 
       },
       "deneme_2": {
           title: "Simple Vocabulary Quiz",
           level: "New",
           desc: "A quick test of basic English vocabulary.",
-          badgeColor: "#3498db" // Mavi
+          badgeColor: "#3498db"
       }
   };
 
@@ -257,10 +267,12 @@
       const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${folder}`);
       const data = await response.json();
       
+      // 1. İSTEK: SIRALAMA (EN YENİ EN ÜSTTE) - Listeyi ters çevir.
+      data.reverse(); 
+      
       // Yükleniyor yazısını temizle
       gamesGrid.innerHTML = ''; 
       
-      // Gelen veride oyun bulunamazsa
       if (!Array.isArray(data) || data.length === 0) {
           gamesGrid.innerHTML = '<p style="text-align:center; color:#e94560; padding:20px;">"games" klasöründe hiç oyun bulunamadı. Lütfen klasörü kontrol edin.</p>';
           return;
@@ -273,24 +285,38 @@
 
         // Linki Belirle
         if (item.type === 'file' && fileName.endsWith('.html')) {
-            // DURUM 1: Tek HTML Dosyası (games/dosya.html)
             gameUrl = `https://${username}.github.io/${repo}/${folder}/${fileName}`;
             isGame = true;
         } else if (item.type === 'dir') {
-            // DURUM 2: Klasör (games/klasor/index.html)
             gameUrl = `https://${username}.github.io/${repo}/${folder}/${fileName}/index.html`;
             isGame = true;
         }
         
-        // Eğer bu bir oyunsa (Dosya veya Klasör) kartı oluştur
         if (isGame) {
             // Varsayılan Değerler
-            let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim().toUpperCase();
+            let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
             let desc = "Interactive English Activity";
             let level = "Game";
             let badgeStyle = "background: #3498db;"; // Varsayılan Mavi
+            let cardClass = ""; // Yeni CSS sınıfı
 
-            // Özel Bilgi Kontrolü (customGameDetails listesinde var mı?)
+            // 2. İSTEK: DİNAMİK BAŞLIK ATAMA VE CSS SINIFI BELİRLEME
+            if (item.type === 'file') {
+                // games/ içindeki tek HTML dosyaları için
+                level = "Interactive Activity"; 
+                desc = "A reading or vocabulary practice session.";
+                cardClass = "card-activity"; 
+            } else if (item.type === 'dir') {
+                // games/klasor/ içindeki oyunlar için
+                level = "Game"; 
+                desc = "An interactive game from the sub-directory.";
+                cardClass = "card-game";
+            }
+
+            // Başlık her zaman büyük harf olsun
+            title = title.toUpperCase();
+            
+            // Özel Bilgi Kontrolü (customGameDetails listesinde varsa OVERRIDE et)
             if (customGameDetails[fileName]) {
                 const details = customGameDetails[fileName];
                 title = details.title;
@@ -301,9 +327,9 @@
                 }
             }
 
-            // HTML Kartını Oluştur
+            // HTML Kartını Oluştur (cardClass burada kullanılıyor)
             const cardHTML = `
-            <div class="game-card">
+            <div class="game-card ${cardClass}">
                 <span class="level-badge" style="${badgeStyle}">${level}</span>
                 <h3>${title}</h3>
                 <p>${desc}</p>
@@ -322,7 +348,6 @@
     }
   }
 
-  // Sayfa açıldığında çalıştır
   document.addEventListener('DOMContentLoaded', fetchGames);
 </script>
 

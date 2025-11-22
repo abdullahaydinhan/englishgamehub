@@ -74,7 +74,7 @@
 
     /* **FARKLI KLASÖR TİPLERİ İÇİN FARKLI STİL UYGULAMA** */
     .card-activity {
-        /* Interactive Activities Klasöründen gelenler (Mavi Tema) */
+        /* Interactive_Activities Klasöründen gelenler (Mavi Tema) */
         border: 3px solid #3498db; 
         box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
     }
@@ -149,13 +149,13 @@
   const repo = "english-game-hub"; // Lütfen buranın doğru olduğundan emin olun
   
   // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
-  // DÜZELTME: Interactive_Activities klasör adını alt çizgi (_) ile eşleştiriyoruz
-  const SOURCE_FOLDERS = ["games", "Interactive_Activities"]; 
+  // DÜZELTME: Klasör adları tam olarak GitHub'daki gibi (Büyük 'G' ve Alt çizgi '_')
+  const SOURCE_FOLDERS = ["Games", "Interactive_Activities"]; 
   const GRADE_LEVELS = ["9TH_Grade", "10TH_Grade", "11TH_Grade", "12TH_Grade"]; 
   
   const allContentContainer = document.getElementById('all-content-container');
 
-  // --- ÖZEL OYUN BİLGİLERİ ---
+  // --- ÖZEL OYUN BİLGİLERİ (Kart Başlıklarını Düzenlemek İçin) ---
   const customGameDetails = {
       "Land_of_Fire.html": { title: "Land of Fire Reading", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan ile ilgili okuma ve anlama pratiği.", badgeColor: "#f39c12" },
       "Digital_World.html": { title: "Safer Digital World Quiz", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
@@ -171,6 +171,7 @@
     const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${fullPath}`;
     
     const response = await fetch(apiUrl);
+
     // 404 (bulunamadı) veya boş klasör ise boş dizi döndür
     if (!response.ok || response.status === 404) return []; 
     // API limitine takılma kontrolü
@@ -235,11 +236,11 @@
           let sourceFolder = item.sourceFolder;
           
           // URL belirleme
-          if (sourceFolder === "games" && item.type === 'dir') {
+          if (sourceFolder === "Games" && item.type === 'dir') {
               // Games klasörü altındaki oyunlar (klasör içindeki index.html'e gider)
               gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
           } 
-          else if ((sourceFolder === "Interactive_Activities" && item.type === 'file') && fileName.endsWith('.html')) {
+          else if (sourceFolder === "Interactive_Activities" && item.type === 'file' && fileName.endsWith('.html')) {
               // Interactive Activities altındaki HTML dosyaları (doğrudan dosyaya gider)
               gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
           } else {
@@ -254,7 +255,7 @@
           let badgeStyle = "background: #3498db;"; 
           let cardClass = ""; 
 
-          if (sourceFolder === "games") {
+          if (sourceFolder === "Games") {
               level = "Game";
               desc = "An interactive game from the sub-directory.";
               cardClass = "card-game";

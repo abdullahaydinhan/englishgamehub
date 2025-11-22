@@ -11,11 +11,8 @@
   <style>
     /* Temel Stil Ayarları */
     :root {
-        --bg-color: #f5f5f5; 
-        --primary-color: #16213e; 
-        --accent-color: #e94560; 
-        --accent-hover-color: #533483;
-        --text-color: #333; 
+        --bg-color: #f5f5f5; --primary-color: #16213e; --accent-color: #e94560; 
+        --accent-hover-color: #533483; --text-color: #333; 
         --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     body {
@@ -117,7 +114,7 @@
     <nav id="navbar">
       <a href="index.html" class="active">Home</a>
       <a href="#all-content-container">Content</a>
-      <a href="Interactive%20Activities/index.html">Interactive Activities</a> 
+      <a href="Interactive_Activities/index.html">Interactive Activities</a> 
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
     </nav>
@@ -148,24 +145,22 @@
 
 <script>
   // --- AYARLAR ---
-  const username = "hunter5234";
-  const repo = "english-game-hub";
+  const username = "hunter5234"; // Lütfen buranın doğru olduğundan emin olun
+  const repo = "english-game-hub"; // Lütfen buranın doğru olduğundan emin olun
   
   // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
-  const SOURCE_FOLDERS = ["games", "Interactive%20Activities"];
-  // VAR OLAN SINIF DÜZEYLERİNİZİ TAM OLARAK BURAYA GİRİN:
+  // DÜZELTME: Interactive_Activities klasör adını alt çizgi (_) ile eşleştiriyoruz
+  const SOURCE_FOLDERS = ["games", "Interactive_Activities"]; 
   const GRADE_LEVELS = ["9TH_Grade", "10TH_Grade", "11TH_Grade", "12TH_Grade"]; 
   
   const allContentContainer = document.getElementById('all-content-container');
 
-  // --- ÖZEL OYUN BİLGİLERİ (AÇIKLAMA VE BAŞLIKLARI ÖZELLEŞTİRMEK İÇİN) ---
+  // --- ÖZEL OYUN BİLGİLERİ ---
   const customGameDetails = {
-      // Dosya veya klasör adını (uzantısız/uzantılı) buraya girin. Klasör hiyerarşisi önemli değil, sadece dosya adı önemli.
-      "azerbaijan.html": { title: "Land of Fire (Azerbaijan)", level: "Level: A2", desc: "Geography, culture, and history.", badgeColor: "#f39c12" },
-      "chile.html": { title: "Somewhere Far Away (Chile)", level: "Level: A2", desc: "Reading and comprehension skills.", badgeColor: "#f39c12" },
-      "digital.html": { title: "Safer Digital World", level: "Level: A2", desc: "Cybersecurity vocabulary practice.", badgeColor: "#e94560" },
-      "Milyoner9_1": { title: "Who Wants to Be a Millionaire?", level: "Level: B1", desc: "Test your general knowledge.", badgeColor: "#27ae60" },
-      "deneme_2": { title: "Simple Vocabulary Quiz", level: "New", desc: "A quick test of basic English vocabulary.", badgeColor: "#3498db" }
+      "Land_of_Fire.html": { title: "Land of Fire Reading", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan ile ilgili okuma ve anlama pratiği.", badgeColor: "#f39c12" },
+      "Digital_World.html": { title: "Safer Digital World Quiz", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
+      "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Sınav", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
+      // Lütfen kendi dosya/klasör adlarınızı buraya eklemeye devam edin
   };
 
   /**
@@ -178,6 +173,7 @@
     const response = await fetch(apiUrl);
     // 404 (bulunamadı) veya boş klasör ise boş dizi döndür
     if (!response.ok || response.status === 404) return []; 
+    // API limitine takılma kontrolü
     if (response.status === 403) throw new Error('GitHub API Limitine ulaşıldı.');
     
     const data = await response.json();
@@ -191,7 +187,7 @@
 
   async function fetchAllContent() {
     try {
-      // 1. ADIM: İKİ ANA KLASÖR VE TÜM SINIFLARDAN VERİLERİ ÇEK
+      // 1. ADIM: TÜM KLASÖRLERDEN VERİLERİ ÇEK
       const fetchPromises = [];
       SOURCE_FOLDERS.forEach(source => {
         GRADE_LEVELS.forEach(grade => {
@@ -199,20 +195,17 @@
         });
       });
 
-      // Tüm verileri aynı anda çek
       const results = await Promise.all(fetchPromises);
       let allData = results.flat(); 
       
-      // Yükleniyor yazısını temizle
       allContentContainer.innerHTML = ''; 
       
       if (allData.length === 0) {
-          allContentContainer.innerHTML += '<p style="text-align:center; color:#999; padding:20px;">Henüz listelenecek içerik bulunamadı. Lütfen GitHub klasör yapısını kontrol edin.</p>';
+          allContentContainer.innerHTML += '<p style="text-align:center; color:#999; padding:20px;">Henüz listelenecek içerik bulunamadı. Lütfen klasör adlarınızı kontrol edin (Büyük/küçük harf, alt çizgi vb.).</p>';
           return;
       }
       
       // 2. ADIM: GRUPLA VE SIRALA
-      // Dosya/Klasör adına göre ters alfabetik sıralama (En yeni/son eklenen üstte)
       allData.sort((a, b) => b.name.localeCompare(a.name)); 
       
       const groupedData = allData.reduce((acc, item) => {
@@ -229,7 +222,7 @@
         // Sınıf Başlığını Oluştur
         const gradeTitle = document.createElement('h2');
         gradeTitle.className = 'grade-section-title';
-        gradeTitle.textContent = grade.replace('_', ' ').toUpperCase(); // Örn: 9TH_GRADE -> 9TH GRADE
+        gradeTitle.textContent = grade.replace('_', ' ').toUpperCase(); 
         allContentContainer.appendChild(gradeTitle);
 
         // Grid Konteynerini Oluştur
@@ -241,18 +234,20 @@
           let gameUrl = "";
           let sourceFolder = item.sourceFolder;
           
-          // URL belirleme (Games klasörü altındaki klasörler index.html'e gider)
+          // URL belirleme
           if (sourceFolder === "games" && item.type === 'dir') {
+              // Games klasörü altındaki oyunlar (klasör içindeki index.html'e gider)
               gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
           } 
-          // Interactive Activities veya games klasörü altındaki tek HTML dosyaları doğrudan dosyaya gider
-          else if ((sourceFolder === "Interactive%20Activities" || (sourceFolder === "games" && item.type === 'file')) && fileName.endsWith('.html')) {
+          else if ((sourceFolder === "Interactive_Activities" && item.type === 'file') && fileName.endsWith('.html')) {
+              // Interactive Activities altındaki HTML dosyaları (doğrudan dosyaya gider)
               gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
           } else {
-              return; // Oyun veya aktivite olmayan diğer dosyaları/klasörleri atla
+              // Yukarıdaki şartlara uymayan tüm içerikleri (örneğin .js, .css dosyalarını veya index.html olmayan dosyaları) atla
+              return; 
           }
 
-          // Varsayılan Değerler ve CSS Sınıfı (KLASÖRE GÖRE ATANIR)
+          // Varsayılan Değerler ve CSS Sınıfı
           let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
           let desc = "";
           let level = "";
@@ -263,7 +258,7 @@
               level = "Game";
               desc = "An interactive game from the sub-directory.";
               cardClass = "card-game";
-          } else if (sourceFolder === "Interactive%20Activities") {
+          } else if (sourceFolder === "Interactive_Activities") {
               level = "Interactive Activity"; 
               desc = "A reading or vocabulary practice session.";
               cardClass = "card-activity"; 
@@ -300,7 +295,7 @@
 
     } catch (error) {
       console.error('İçerikler yüklenirken hata oluştu:', error);
-      allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'GitHub API Limit Hatası'}.</p>`;
+      allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'Bilinmeyen Hata'}. Lütfen Konsol sekmesini kontrol edin.</p>`;
     }
   }
 

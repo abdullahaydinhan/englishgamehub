@@ -145,22 +145,26 @@
 
 <script>
   // --- AYARLAR ---
-  const username = "hunter5234"; // Lütfen buranın doğru olduğundan emin olun
-  const repo = "english-game-hub"; // Lütfen buranın doğru olduğundan emin olun
+  const username = "hunter5234"; // GitHub kullanıcı adınız
+  const repo = "english-game-hub"; // GitHub deponuzun adı
   
   // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
-  // DÜZELTME: Klasör adları tam olarak GitHub'daki gibi (Büyük 'G' ve Alt çizgi '_')
+  // DÜZELTME 1: Games (Büyük G) ve Interactive_Activities (Alt çizgi)
   const SOURCE_FOLDERS = ["Games", "Interactive_Activities"]; 
-  const GRADE_LEVELS = ["9TH_Grade", "10TH_Grade", "11TH_Grade", "12TH_Grade"]; 
+  
+  // DÜZELTME 2: Sınıf adları tam olarak GitHub'daki gibi (hepsi küçük harf)
+  const GRADE_LEVELS = ["9th_grade", "10th_grade", "11th_grade", "12th_grade"]; 
   
   const allContentContainer = document.getElementById('all-content-container');
 
   // --- ÖZEL OYUN BİLGİLERİ (Kart Başlıklarını Düzenlemek İçin) ---
   const customGameDetails = {
+      // Aktivite Dosyaları (Interactive_Activities klasörü için)
       "Land_of_Fire.html": { title: "Land of Fire Reading", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan ile ilgili okuma ve anlama pratiği.", badgeColor: "#f39c12" },
       "Digital_World.html": { title: "Safer Digital World Quiz", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
+      // Oyun Klasörleri (Games klasörü için - SADECE KLASÖR ADI uzantısız)
       "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Sınav", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
-      // Lütfen kendi dosya/klasör adlarınızı buraya eklemeye devam edin
+      "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Hızlı Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
   };
 
   /**
@@ -202,11 +206,12 @@
       allContentContainer.innerHTML = ''; 
       
       if (allData.length === 0) {
-          allContentContainer.innerHTML += '<p style="text-align:center; color:#999; padding:20px;">Henüz listelenecek içerik bulunamadı. Lütfen klasör adlarınızı kontrol edin (Büyük/küçük harf, alt çizgi vb.).</p>';
+          allContentContainer.innerHTML += '<p style="text-align:center; color:red; padding:20px;">HATA: Henüz listelenecek içerik bulunamadı. Lütfen klasör ve dosya adlarının JavaScript değişkenlerinizle (yukarıdaki 9TH_Grade gibi) tam eşleştiğinden emin olun.</p>';
           return;
       }
       
       // 2. ADIM: GRUPLA VE SIRALA
+      // En yeni/son eklenen üstte olması için ters alfabetik sıralama
       allData.sort((a, b) => b.name.localeCompare(a.name)); 
       
       const groupedData = allData.reduce((acc, item) => {
@@ -220,7 +225,7 @@
         const gradeItems = groupedData[grade];
         if (!gradeItems || gradeItems.length === 0) return;
 
-        // Sınıf Başlığını Oluştur
+        // Sınıf Başlığını Oluştur (Örn: 9th_grade -> 9TH GRADE)
         const gradeTitle = document.createElement('h2');
         gradeTitle.className = 'grade-section-title';
         gradeTitle.textContent = grade.replace('_', ' ').toUpperCase(); 
@@ -244,7 +249,7 @@
               // Interactive Activities altındaki HTML dosyaları (doğrudan dosyaya gider)
               gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
           } else {
-              // Yukarıdaki şartlara uymayan tüm içerikleri (örneğin .js, .css dosyalarını veya index.html olmayan dosyaları) atla
+              // Diğer dosyaları/klasörleri atla (örn: .js, .css, README)
               return; 
           }
 
@@ -268,8 +273,11 @@
           title = title.toUpperCase();
           
           // Özel Bilgi Kontrolü (Override)
-          if (customGameDetails[fileName]) {
-              const details = customGameDetails[fileName];
+          // Not: Games için KLASÖR ADI (uzantısız), Activities için DOSYA ADI (uzantılı) kullanılır.
+          const lookupKey = sourceFolder === "Games" ? fileName : fileName;
+          
+          if (customGameDetails[lookupKey]) {
+              const details = customGameDetails[lookupKey];
               title = details.title;
               desc = details.desc;
               level = details.level;
@@ -296,7 +304,7 @@
 
     } catch (error) {
       console.error('İçerikler yüklenirken hata oluştu:', error);
-      allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'Bilinmeyen Hata'}. Lütfen Konsol sekmesini kontrol edin.</p>`;
+      allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'Bilinmeyen Hata'}. Lütfen tarayıcı Konsol sekmesini kontrol edin.</p>`;
     }
   }
 

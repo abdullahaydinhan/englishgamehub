@@ -106,29 +106,5 @@
     "badgeColor": "bg-info",
     "isFeatured": false,
     "isVisible": true
-  },
-  {
-    "path": "Vocabulary/9TH_GRADE/9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.docx",
-    "name": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.docx",
-    "title": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Vocabulary",
-    "unit": "",
-    "badgeColor": "bg-success",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
-    "path": "Vocabulary/9TH_GRADE/9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.pdf",
-    "name": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.pdf",
-    "title": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Vocabulary",
-    "unit": "",
-    "badgeColor": "bg-success",
-    "isFeatured": false,
-    "isVisible": true
   }
 ]

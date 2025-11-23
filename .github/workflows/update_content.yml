@@ -5,7 +5,6 @@ on:
     paths:
       - 'Games/**'
       - 'Interactive_Activities/**'
-      # Gelecekte 'Quizzes' eklerseniz buraya: - 'Quizzes/**' ekleyin.
 
 jobs:
   build:
@@ -15,39 +14,71 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate Games JSON
-      run: |
-        echo "[" > games_data.json
-        FIRST=true
-        
-        # 1. GAMES KLASÖRÜNÜ TARA (Klasör içindeki index.html'leri bulur)
-        if [ -d "Games" ]; then
-          find Games -mindepth 2 -name "index.html" | while read file; do
-            dir=$(dirname "$file")
-            parent=$(basename "$(dirname "$dir")") # Sınıf (9TH_GRADE)
-            name=$(basename "$dir")                # Oyun Adı (Milyoner)
-            
-            if [ "$FIRST" = true ]; then FIRST=false; else echo "," >> games_data.json; fi
-            echo "{\"name\": \"$name\", \"path\": \"$file\", \"type\": \"dir\", \"grade\": \"$parent\", \"source\": \"Games\"}" >> games_data.json
-          done
-        fi
+    - name: Generate JSON with Node.js
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
 
-        # 2. INTERACTIVE ACTIVITIES KLASÖRÜNÜ TARA (Direkt .html dosyalarını bulur)
-        if [ -d "Interactive_Activities" ]; then
-          find Interactive_Activities -name "*.html" | while read file; do
-            parent=$(basename "$(dirname "$file")") # Sınıf (9TH_GRADE)
-            name=$(basename "$file")                # Dosya Adı (Unit1.html)
-            
-            if [ "$FIRST" = true ]; then FIRST=false; else echo "," >> games_data.json; fi
-            echo "{\"name\": \"$name\", \"path\": \"$file\", \"type\": \"file\", \"grade\": \"$parent\", \"source\": \"Interactive_Activities\"}" >> games_data.json
-          done
-        fi
-        
-        echo "]" >> games_data.json
+          const gamesDir = 'Games';
+          const activitiesDir = 'Interactive_Activities';
+          let results = [];
 
-    - name: Commit and Push JSON
+          // 1. GAMES KLASÖRÜNÜ TARA
+          if (fs.existsSync(gamesDir)) {
+            // Sınıf klasörlerini oku (9TH_GRADE, 10TH_GRADE...)
+            fs.readdirSync(gamesDir).forEach(grade => {
+              const gradePath = path.join(gamesDir, grade);
+              if (fs.statSync(gradePath).isDirectory()) {
+                // Oyun klasörlerini oku (Milyoner, Jeopardy...)
+                fs.readdirSync(gradePath).forEach(gameName => {
+                  const gamePath = path.join(gradePath, gameName);
+                  // Eğer klasörse ve içinde index.html varsa listeye ekle
+                  if (fs.statSync(gamePath).isDirectory()) {
+                    if (fs.existsSync(path.join(gamePath, 'index.html'))) {
+                      results.push({
+                        name: gameName, // Klasör adı oyun adı olur
+                        path: `${gamesDir}/${grade}/${gameName}/index.html`,
+                        type: 'dir',
+                        grade: grade,
+                        source: 'Games'
+                      });
+                    }
+                  }
+                });
+              }
+            });
+          }
+
+          // 2. INTERACTIVE ACTIVITIES KLASÖRÜNÜ TARA
+          if (fs.existsSync(activitiesDir)) {
+            fs.readdirSync(activitiesDir).forEach(grade => {
+              const gradePath = path.join(activitiesDir, grade);
+              if (fs.statSync(gradePath).isDirectory()) {
+                // Dosyaları oku
+                fs.readdirSync(gradePath).forEach(file => {
+                  // Sadece .html dosyalarını al
+                  if (file.endsWith('.html')) {
+                    results.push({
+                      name: file, // Dosya adı (örn: azerbaijan.html)
+                      path: `${activitiesDir}/${grade}/${file}`,
+                      type: 'file',
+                      grade: grade,
+                      source: 'Interactive_Activities'
+                    });
+                  }
+                });
+              }
+            });
+          }
+
+          // Dosyayı yaz (Pretty print formatında)
+          fs.writeFileSync('games_data.json', JSON.stringify(results, null, 2));
+
+    - name: Commit and Push
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add games_data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update content list 🤖" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update games list (Node.js Fix) 🚀" && git push)

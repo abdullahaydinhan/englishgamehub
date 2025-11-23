@@ -4,7 +4,23 @@
     "path": "Games/10TH_GRADE/deneme 2/index.html",
     "type": "dir",
     "grade": "10TH_GRADE",
-    "source": "Games"
+    "source": "Games",
+    "title": "10.2.Milyoner",
+    "description": "Have fun"
+  },
+  {
+    "name": "Suleyman_The_Magnificent.html",
+    "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
+    "type": "file",
+    "grade": "10TH_GRADE",
+    "source": "Interactive_Activities"
+  },
+  {
+    "name": "Unforgettable_Hero.html",
+    "path": "Interactive_Activities/10TH_GRADE/Unforgettable_Hero.html",
+    "type": "file",
+    "grade": "10TH_GRADE",
+    "source": "Interactive_Activities"
   },
   {
     "name": "9.1.Jeopardy",
@@ -26,20 +42,6 @@
     "type": "dir",
     "grade": "9TH_GRADE",
     "source": "Games"
-  },
-  {
-    "name": "Suleyman_The_Magnificent.html",
-    "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
-    "type": "file",
-    "grade": "10TH_GRADE",
-    "source": "Interactive_Activities"
-  },
-  {
-    "name": "Unforgettable_Hero.html",
-    "path": "Interactive_Activities/10TH_GRADE/Unforgettable_Hero.html",
-    "type": "file",
-    "grade": "10TH_GRADE",
-    "source": "Interactive_Activities"
   },
   {
     "name": "azerbaijan.html",

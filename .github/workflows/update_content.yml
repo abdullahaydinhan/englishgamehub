@@ -5,6 +5,7 @@ on:
     paths:
       - 'Games/**'
       - 'Interactive_Activities/**'
+  workflow_dispatch: # Manuel tetikleme için de buton ekledim
 
 jobs:
   build:
@@ -14,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate JSON with Node.js
+    - name: Generate JSON with Smart Merge Logic
       uses: actions/github-script@v6
       with:
         script: |
@@ -23,26 +24,54 @@ jobs:
 
           const gamesDir = 'Games';
           const activitiesDir = 'Interactive_Activities';
+          const outputFile = 'games_data.json';
+          
           let results = [];
+          let existingData = {};
 
-          // 1. GAMES KLASÖRÜNÜ TARA
+          // --- 1. HAFIZA: MEVCUT VERİYİ OKU VE SAKLA ---
+          if (fs.existsSync(outputFile)) {
+            try {
+              const rawData = fs.readFileSync(outputFile, 'utf8');
+              const json = JSON.parse(rawData);
+              // Verileri 'path' (dosya yolu) anahtarı ile sakla
+              json.forEach(item => {
+                existingData[item.path] = item;
+              });
+              console.log("✅ Mevcut ayarlar hafızaya alındı.");
+            } catch (e) {
+              console.log("⚠️ Eski dosya okunamadı, sıfırdan oluşturuluyor.");
+            }
+          }
+
+          // --- 2. GAMES KLASÖRÜNÜ TARA ---
           if (fs.existsSync(gamesDir)) {
-            // Sınıf klasörlerini oku (9TH_GRADE, 10TH_GRADE...)
             fs.readdirSync(gamesDir).forEach(grade => {
               const gradePath = path.join(gamesDir, grade);
               if (fs.statSync(gradePath).isDirectory()) {
-                // Oyun klasörlerini oku (Milyoner, Jeopardy...)
                 fs.readdirSync(gradePath).forEach(gameName => {
                   const gamePath = path.join(gradePath, gameName);
-                  // Eğer klasörse ve içinde index.html varsa listeye ekle
                   if (fs.statSync(gamePath).isDirectory()) {
                     if (fs.existsSync(path.join(gamePath, 'index.html'))) {
+                      
+                      // Dosya yolunu oluştur
+                      const fullPath = `${gamesDir}/${grade}/${gameName}/index.html`;
+                      
+                      // Eski veriyi hatırla (Varsa)
+                      const oldItem = existingData[fullPath];
+
                       results.push({
-                        name: gameName, // Klasör adı oyun adı olur
-                        path: `${gamesDir}/${grade}/${gameName}/index.html`,
+                        // Eğer admin panelinden başlık değiştirildiyse onu koru, yoksa klasör adını yaz
+                        title: (oldItem && oldItem.title) ? oldItem.title : gameName,
+                        name: gameName, // Orijinal klasör adı teknik referans için kalsın
+                        path: fullPath,
                         type: 'dir',
                         grade: grade,
-                        source: 'Games'
+                        source: 'Games',
+                        // Görünürlük ayarını koru (Varsayılan: true)
+                        isVisible: (oldItem && oldItem.isVisible !== undefined) ? oldItem.isVisible : true,
+                        // Açıklamayı koru
+                        description: (oldItem && oldItem.description) ? oldItem.description : ""
                       });
                     }
                   }
@@ -51,21 +80,28 @@ jobs:
             });
           }
 
-          // 2. INTERACTIVE ACTIVITIES KLASÖRÜNÜ TARA
+          // --- 3. INTERACTIVE ACTIVITIES KLASÖRÜNÜ TARA ---
           if (fs.existsSync(activitiesDir)) {
             fs.readdirSync(activitiesDir).forEach(grade => {
               const gradePath = path.join(activitiesDir, grade);
               if (fs.statSync(gradePath).isDirectory()) {
-                // Dosyaları oku
                 fs.readdirSync(gradePath).forEach(file => {
-                  // Sadece .html dosyalarını al
                   if (file.endsWith('.html')) {
+                    
+                    const fullPath = `${activitiesDir}/${grade}/${file}`;
+                    const oldItem = existingData[fullPath];
+                    // Dosya adından .html uzantısını kaldırıp geçici başlık yap
+                    const cleanName = file.replace('.html', '');
+
                     results.push({
-                      name: file, // Dosya adı (örn: azerbaijan.html)
-                      path: `${activitiesDir}/${grade}/${file}`,
+                      title: (oldItem && oldItem.title) ? oldItem.title : cleanName,
+                      name: file,
+                      path: fullPath,
                       type: 'file',
                       grade: grade,
-                      source: 'Interactive_Activities'
+                      source: 'Interactive_Activities',
+                      isVisible: (oldItem && oldItem.isVisible !== undefined) ? oldItem.isVisible : true,
+                      description: (oldItem && oldItem.description) ? oldItem.description : ""
                     });
                   }
                 });
@@ -73,12 +109,14 @@ jobs:
             });
           }
 
-          // Dosyayı yaz (Pretty print formatında)
-          fs.writeFileSync('games_data.json', JSON.stringify(results, null, 2));
+          // --- 4. DOSYAYI YAZ ---
+          fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
+          console.log(`🎉 Toplam ${results.length} içerik güncellendi.`);
 
     - name: Commit and Push
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add games_data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update games list (Node.js Fix) 🚀" && git push)
+        # Sadece değişiklik varsa commit at, yoksa hata verme
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update games list (Smart Merge) 🤖" && git push)

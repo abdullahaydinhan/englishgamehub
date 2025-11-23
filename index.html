@@ -8,14 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px; border-radius: 0 0 30px 30px; }
         
-        /* Kart Tasarımı */
+        /* NAVBAR (ÜST MENÜ) AYARLARI */
+        .navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: bold; font-size: 1.5rem; }
+        
+        /* HERO (BAŞLIK) ALANI */
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 0; margin-bottom: 30px; border-radius: 0 0 30px 30px; }
+        
+        /* KART TASARIMI */
         .game-card { border: none; border-radius: 15px; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; height: 100%; background: white; }
         .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-body { padding: 1.2rem; }
         
-        /* İkon Kutuları ve Renkleri */
+        /* İKON KUTULARI VE RENKLERİ */
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
         .style-Games { background-color: #d63384; }                  /* Pembe */
@@ -28,7 +34,7 @@
 
         .section-title { border-left: 5px solid #0d6efd; padding-left: 15px; margin: 30px 0 20px 0; font-weight: bold; color: #333; }
         
-        /* Sekmeler */
+        /* SEKMELER */
         .nav-pills .nav-link { border-radius: 20px; padding: 10px 25px; margin: 0 5px; color: #555; font-weight: 600; background: white; border: 1px solid #eee; }
         .nav-pills .nav-link.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13,110,253,0.3); border: none; }
         
@@ -37,14 +43,40 @@
 </head>
 <body>
 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fa-solid fa-graduation-cap"></i> EGH</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#"><i class="fa-solid fa-house"></i> Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#content-area"><i class="fa-solid fa-gamepad"></i> Games & Activities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#contactModal"><i class="fa-solid fa-envelope"></i> Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="admin.html" target="_blank"><i class="fa-solid fa-lock"></i> Admin</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <div class="hero-section text-center shadow">
     <div class="container">
-        <h1 class="display-4 fw-bold"><i class="fa-solid fa-graduation-cap"></i> English Game Hub</h1>
+        <h1 class="display-4 fw-bold">English Game Hub</h1>
         <p class="lead">Learn English with Fun & Interactive Activities</p>
+        <a href="#content-area" class="btn btn-light btn-lg mt-3 fw-bold text-primary rounded-pill">Start Learning</a>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="content-area">
     <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#grade9" type="button">9. Sınıf</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade10" type="button">10. Sınıf</button></li>
@@ -53,20 +85,41 @@
     </ul>
 
     <div class="tab-content" id="gradeContent">
-        <div class="tab-pane fade show active" id="grade9">Yükleniyor...</div>
+        <div class="tab-pane fade show active" id="grade9">
+            <div class="text-center py-5"><div class="spinner-border text-primary"></div><br>Yükleniyor...</div>
+        </div>
         <div class="tab-pane fade" id="grade10">Yükleniyor...</div>
         <div class="tab-pane fade" id="grade11">Yükleniyor...</div>
         <div class="tab-pane fade" id="grade12">Yükleniyor...</div>
     </div>
 </div>
 
-<footer class="text-center py-4 text-muted mt-5">
-    <small>&copy; 2025 English Game Hub</small>
+<footer class="text-center py-4 text-muted mt-5 border-top">
+    <small>&copy; 2025 English Game Hub - Designed for Students</small>
 </footer>
+
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-paper-plane"></i> Contact Teacher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Hello! If you have any questions about the games or English lessons, you can contact me.</p>
+                <hr>
+                <p><strong><i class="fa-solid fa-envelope"></i> Email:</strong> <a href="mailto:teacher@example.com">teacher@example.com</a></p>
+                <p class="text-muted small">Have fun learning!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     // --- GÖRÜNÜM AYARLARI ---
-    // Burada tanımlı olanlar sırayla basılır. Eğer o türde içerik yoksa EKRANA BASILMAZ.
     const SECTIONS = [
         { key: 'Games', title: '🎮 Interactive Games', icon: 'fa-gamepad' },
         { key: 'Interactive_Activities', title: '🧩 Interactive Activities', icon: 'fa-laptop-code' },
@@ -80,41 +133,37 @@
     fetch('games_data.json')
         .then(response => response.json())
         .then(data => {
-            // En yeni eklenenler en üstte olsun
             const reversedData = data.reverse();
             renderGrade('9TH_GRADE', 'grade9', reversedData);
             renderGrade('10TH_GRADE', 'grade10', reversedData);
             renderGrade('11TH_GRADE', 'grade11', reversedData);
             renderGrade('12TH_GRADE', 'grade12', reversedData);
         })
-        .catch(error => console.error('Hata:', error));
+        .catch(error => {
+            console.error('Hata:', error);
+            document.getElementById('grade9').innerHTML = '<div class="alert alert-danger">Veriler yüklenirken hata oluştu.</div>';
+        });
 
     function renderGrade(gradeKey, containerId, allData) {
         const container = document.getElementById(containerId);
-        // Sadece bu sınıfın ve gizli olmayan içerikleri al
         const gradeItems = allData.filter(item => item.grade === gradeKey && item.isVisible !== false);
         
         if (gradeItems.length === 0) {
-            container.innerHTML = `<div class="alert alert-light text-center">Bu sınıf için henüz içerik eklenmemiş.</div>`;
+            container.innerHTML = `<div class="alert alert-light text-center py-4"><i class="fa-solid fa-folder-open fa-2x text-muted mb-2"></i><br>Bu sınıf için henüz içerik eklenmemiş.</div>`;
             return;
         }
 
         let htmlContent = "";
 
-        // Tanımlı bölümleri döngüye al (Games, Activities, vs.)
         SECTIONS.forEach(section => {
-            // Sadece bu türdeki (source) içerikleri bul
             const itemsInThisSection = gradeItems.filter(item => item.source === section.key);
             
-            // DİKKAT: Eğer bu türde içerik varsa başlığı ve kartları ekle, YOKSA HİÇBİR ŞEY YAPMA.
             if (itemsInThisSection.length > 0) {
                 htmlContent += `<h3 class="section-title"><i class="fa-solid ${section.icon}"></i> ${section.title}</h3>`;
                 htmlContent += `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
                 
                 itemsInThisSection.forEach(item => {
-                    // BAŞLIK KONTROLÜ: Admin başlık girmemişse dosya adını göster
                     const displayTitle = item.title || item.name.replace('.html', '').replace(/_/g, ' ');
-                    
                     const badge = item.unit ? `<span class="unit-badge">${item.unit}</span>` : '';
                     const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1"></i>` : '';
                     
@@ -138,7 +187,7 @@
                     </div>`;
                 });
                 
-                htmlContent += `</div>`; // Row bitişi
+                htmlContent += `</div>`;
             }
         });
         

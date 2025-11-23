@@ -1,2 +1,218 @@
-const GITHUB_USERNAME = "hunter5234"; 
-const REPO_NAME = "english-game-hub";
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Game Hub - Admin Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; }
+        .container { max-width: 1200px; margin-top: 30px; }
+        .status-badge { font-size: 0.8em; }
+        .loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; text-align: center; padding-top: 20%; }
+        .changed-row { background-color: #fff3cd !important; } /* Değişiklik yapılan satır sarı olur */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🛠️ Oyun Yönetim Paneli</h2>
+        <button class="btn btn-primary" onclick="loadData()">🔄 Yenile</button>
+    </div>
+
+    <div id="loginSection" class="card p-4 mb-4">
+        <h4>Giriş Yap</h4>
+        <p class="text-muted">GitHub'dan aldığınız Token'ı giriniz.</p>
+        <div class="input-group mb-3">
+            <input type="password" id="githubToken" class="form-control" placeholder="ghp_..." value="">
+            <button class="btn btn-success" onclick="verifyAndLoad()">Giriş Yap & Verileri Çek</button>
+        </div>
+        <small class="text-secondary">Token tarayıcınızda geçici olarak saklanır.</small>
+    </div>
+
+    <div id="tableSection" style="display:none;">
+        <div class="alert alert-info">
+            Değişiklikleri yaptıktan sonra en alttaki veya sağ üstteki <b>"Kaydet"</b> butonuna basmayı unutmayın.
+        </div>
+        
+        <div class="table-responsive bg-white rounded shadow-sm p-3">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="5%">Aktif</th>
+                        <th width="10%">Sınıf</th>
+                        <th width="10%">Tür</th>
+                        <th width="25%">Görünen Başlık (Düzenlenebilir)</th>
+                        <th width="30%">Açıklama (Düzenlenebilir)</th>
+                        <th width="20%">Orijinal Dosya/Klasör</th>
+                    </tr>
+                </thead>
+                <tbody id="gameTableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="d-grid gap-2 col-6 mx-auto mt-4 mb-5">
+            <button class="btn btn-success btn-lg" onclick="saveChanges()">💾 Değişiklikleri GitHub'a Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<div id="loader" class="loading">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    <h3>İşlem Yapılıyor...</h3>
+</div>
+
+<script>
+    // --- AYARLAR ---
+    // BURALARI KENDİ BİLGİLERİNİZLE KONTROL EDİN!
+    const GITHUB_USERNAME = "hunter5234";  // GitHub kullanıcı adınız
+    const REPO_NAME = "english-game-hub";      // Proje (Repo) adınız
+    const FILE_PATH = "games_data.json";   // Veri dosyası
+    
+    // --- DEĞİŞKENLER ---
+    let currentData = [];
+    let fileSha = ""; // GitHub'a kaydederken dosya versiyonu için gerekli
+
+    // Token'ı localStorage'dan al (Varsa)
+    document.getElementById('githubToken').value = localStorage.getItem('gh_token') || "";
+
+    function showLoader(show) {
+        document.getElementById('loader').style.display = show ? 'block' : 'none';
+    }
+
+    function verifyAndLoad() {
+        const token = document.getElementById('githubToken').value;
+        if (!token) { alert("Lütfen Token giriniz!"); return; }
+        
+        // Token'ı kaydet
+        localStorage.setItem('gh_token', token);
+        loadData();
+    }
+
+    // 1. VERİLERİ ÇEKME (GET)
+    async function loadData() {
+        showLoader(true);
+        const token = localStorage.getItem('gh_token');
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+        try {
+            const response = await fetch(url, {
+                headers: { 
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (!response.ok) throw new Error("Veri çekilemedi! Token veya Repo bilgileri yanlış olabilir.");
+
+            const data = await response.json();
+            fileSha = data.sha; // Dosyanın parmak izini al (Kaydederken lazım)
+            
+            // GitHub içeriği Base64 kodludur, onu çözüyoruz:
+            // Türkçe karakter sorunu olmaması için decodeURIComponent escape trick kullanıyoruz
+            const decodedContent = decodeURIComponent(escape(window.atob(data.content)));
+            currentData = JSON.parse(decodedContent);
+
+            renderTable();
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('tableSection').style.display = 'block';
+
+        } catch (error) {
+            alert("Hata: " + error.message);
+            console.error(error);
+        } finally {
+            showLoader(false);
+        }
+    }
+
+    // 2. TABLOYU OLUŞTURMA
+    function renderTable() {
+        const tbody = document.getElementById('gameTableBody');
+        tbody.innerHTML = "";
+
+        // Önce Sınıfa göre sıralayalım
+        currentData.sort((a, b) => a.grade.localeCompare(b.grade));
+
+        currentData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            
+            // Görünürlük (Checkbox)
+            const isChecked = item.isVisible !== false ? "checked" : "";
+            
+            tr.innerHTML = `
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input" onchange="updateRow(${index}, 'isVisible', this.checked)" ${isChecked} style="transform: scale(1.3);">
+                </td>
+                <td><span class="badge bg-secondary">${item.grade}</span></td>
+                <td><span class="badge ${item.source === 'Games' ? 'bg-primary' : 'bg-info'}">${item.source === 'Games' ? 'Oyun' : 'Aktivite'}</span></td>
+                <td>
+                    <input type="text" class="form-control" value="${item.title || ''}" onchange="updateRow(${index}, 'title', this.value)">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" value="${item.description || ''}" placeholder="Açıklama ekle..." onchange="updateRow(${index}, 'description', this.value)">
+                </td>
+                <td class="text-muted small">
+                    ${item.path}<br>
+                    <i>(${item.name})</i>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 3. VERİYİ GÜNCELLEME (RAM üzerinde)
+    window.updateRow = function(index, key, value) {
+        currentData[index][key] = value;
+        // Görsel geri bildirim (Satır rengini değiştir)
+        document.getElementById('gameTableBody').children[index].classList.add('changed-row');
+    }
+
+    // 4. DEĞİŞİKLİKLERİ GITHUB'A GÖNDERME (PUT)
+    async function saveChanges() {
+        if (!confirm("Tüm değişiklikler siteye yansıtılacak. Emin misiniz?")) return;
+
+        showLoader(true);
+        const token = localStorage.getItem('gh_token');
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+        // JSON'u metne çevirip Türkçe karakterleri bozmadan Base64'e kodla
+        const jsonString = JSON.stringify(currentData, null, 2);
+        const encodedContent = window.btoa(unescape(encodeURIComponent(jsonString)));
+
+        const bodyData = {
+            message: "Admin Panel Update 🛠️",
+            content: encodedContent,
+            sha: fileSha // Hangi versiyonun üzerine yazdığımızı belirtiyoruz
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyData)
+            });
+
+            if (!response.ok) throw new Error("Kaydetme başarısız oldu!");
+
+            const result = await response.json();
+            fileSha = result.content.sha; // Yeni SHA'yı güncelle
+            alert("✅ Başarıyla Kaydedildi! Siteniz birkaç dakika içinde güncellenecektir.");
+            
+            // Satır renklerini temizle
+            document.querySelectorAll('.changed-row').forEach(row => row.classList.remove('changed-row'));
+
+        } catch (error) {
+            alert("Hata oluştu: " + error.message);
+        } finally {
+            showLoader(false);
+        }
+    }
+</script>
+
+</body>
+</html>

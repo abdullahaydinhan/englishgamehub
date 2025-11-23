@@ -9,23 +9,26 @@
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-top: 70px; }
         
-        /* NAVBAR */
+        /* NAVBAR TASARIMI */
         .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; }
-        .navbar-brand { font-weight: 800; font-size: 1.5rem; }
-        .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
+        .navbar-brand { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; position: relative; }
         .nav-link.active { color: #0d6efd !important; }
-        .dropdown-item { font-weight: 500; cursor: pointer; }
+        .nav-link.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 3px; background: #0d6efd; border-radius: 5px; }
+        .dropdown-item { font-weight: 500; cursor: pointer; padding: 10px 20px; }
+        .dropdown-item:hover { background-color: #f0f7ff; color: #0d6efd; }
 
-        /* HERO & ABOUT */
-        .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 80px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
+        /* ANA EKRAN (HERO) */
+        .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 90px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
         
-        /* CARDS */
-        .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; }
-        .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: transparent; }
-        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
+        /* KARTLAR */
+        .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
+        .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
         
-        /* RENKLER */
-        .icon-Games { background-color: #d63384; }
+        .icon-box { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.2rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* KATEGORİ RENKLERİ */
+        .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
         .icon-Vocabulary { background-color: #198754; }
@@ -33,14 +36,15 @@
         .icon-Slides { background-color: #6f42c1; }
         .icon-Documents { background-color: #0dcaf0; }
 
-        /* VIEW SYSTEM */
-        .view-section { display: none; animation: fadeIn 0.4s; }
+        /* SAYFA GÖRÜNÜM GEÇİŞLERİ */
+        .view-section { display: none; animation: fadeIn 0.5s ease; }
         .view-section.active-view { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* TABS */
-        .nav-pills .nav-link { border-radius: 50px; padding: 8px 25px; margin: 0 5px; background: white; border: 1px solid #dee2e6; color: #6c757d; font-weight: 700; }
-        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; border-color: #0d6efd; box-shadow: 0 4px 10px rgba(13,110,253,0.2); }
+        /* TAB BUTONLARI */
+        .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
+        .nav-pills .nav-link.active { background-color: #0d6efd; border-color: #0d6efd; color: white; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
+        .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -60,7 +64,7 @@
                 <li class="nav-item"><a class="nav-link" id="nav-Interactive_Activities" onclick="switchView('Interactive_Activities')">Interactive Activities</a></li>
                 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         Study Materials
                     </a>
                     <ul class="dropdown-menu border-0 shadow">
@@ -74,7 +78,7 @@
 
                 <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchView('about')">About</a></li>
                 <li class="nav-item ms-2">
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button>
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button>
                 </li>
             </ul>
         </div>
@@ -88,30 +92,33 @@
             <p class="lead mb-4 opacity-75">Interactive Games, Quizzes, and Activities for High School Students.</p>
             <div class="d-flex justify-content-center gap-3">
                 <button onclick="switchView('Games')" class="btn btn-light btn-lg rounded-pill fw-bold text-primary px-5 shadow">Play Games</button>
-                <button onclick="switchView('Interactive_Activities')" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-5">Activities</button>
+                <button onclick="switchView('Interactive_Activities')" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-5 border-2">Activities</button>
             </div>
         </div>
     </div>
+    
     <div class="container text-center py-5">
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Games')">
                     <i class="fa-solid fa-gamepad fa-3x text-primary mb-3"></i>
-                    <h4>Fun Games</h4>
+                    <h4 class="fw-bold">Fun Games</h4>
                     <p class="text-muted">Learn vocabulary and grammar while playing fun interactive games.</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Interactive_Activities')">
                     <i class="fa-solid fa-laptop-code fa-3x text-success mb-3"></i>
-                    <h4>Digital Activities</h4>
+                    <h4 class="fw-bold">Digital Activities</h4>
                     <p class="text-muted">Access worksheets, reading passages, and online exercises anywhere.</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="alert('🚧 Exam Prep materials are coming soon!\n\nPlease check back later.')">
                     <i class="fa-solid fa-graduation-cap fa-3x text-warning mb-3"></i>
-                    <h4>Exam Prep</h4>
+                    <h4 class="fw-bold">Exam Prep</h4>
                     <p class="text-muted">Review for your exams with our curated revision materials.</p>
                 </div>
             </div>
@@ -131,7 +138,9 @@
                     I created this platform to help my <strong>9th, 10th, 11th, and 12th-grade students</strong> practice English through digital games, 
                     interactive quizzes, and engaging activities.
                 </p>
-                <h5 class="fw-bold text-primary mt-4">Have fun and keep learning! 🚀</h5>
+                <div class="mt-4 p-3 bg-light rounded-3 d-inline-block">
+                    <h5 class="fw-bold text-primary m-0">Have fun and keep learning! 🚀</h5>
+                </div>
             </div>
         </div>
     </div>
@@ -181,12 +190,12 @@
 </div>
 
 <script>
-    // --- STATE MANAGEMENT ---
+    // --- VERİ YÖNETİMİ ---
     let allData = [];
     let currentMode = 'home'; 
     let currentGrade = '9TH_GRADE';
 
-    // --- CONFIGURATION ---
+    // --- KATEGORİ AYARLARI ---
     const CONFIG = {
         'Games': { title: '🎮 Interactive Games', subtitle: 'Play and learn with our game collection.', icon: 'fa-gamepad' },
         'Interactive_Activities': { title: '🧩 Interactive Activities', subtitle: 'Digital exercises and quizzes.', icon: 'fa-laptop-code' },
@@ -197,21 +206,24 @@
         'Documents': { title: '📄 Documents', subtitle: 'Worksheets and PDFs.', icon: 'fa-file-pdf' }
     };
 
-    // --- INITIALIZATION ---
+    // --- BAŞLANGIÇ: VERİYİ ÇEK ---
     fetch('games_data.json')
         .then(response => response.json())
-        .then(data => { allData = data.reverse(); })
+        .then(data => { 
+            // Veriyi ters çevir (En Yeni -> En Eski)
+            allData = data.reverse(); 
+        })
         .catch(err => console.error(err));
 
-    // --- VIEW SWITCHER ---
+    // --- GÖRÜNÜM DEĞİŞTİRİCİ ---
     function switchView(viewName) {
-        // Navbar Active State
+        // 1. Navbar'da Aktif Linki Ayarla
         document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
         if(document.getElementById('nav-' + viewName)) {
             document.getElementById('nav-' + viewName).classList.add('active');
         }
 
-        // Show/Hide Sections
+        // 2. Sayfaları Gizle/Göster
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
 
         if (viewName === 'home') {
@@ -219,11 +231,11 @@
         } else if (viewName === 'about') {
             document.getElementById('view-about').classList.add('active-view');
         } else {
-            // Generic Content View
+            // İçerik Sayfası (Games, Activities vb.)
             document.getElementById('view-content').classList.add('active-view');
             currentMode = viewName; 
             
-            // Set Titles dynamically
+            // Başlıkları Dinamik Güncelle
             const conf = CONFIG[viewName] || { title: viewName, subtitle: 'Resource Library' };
             document.getElementById('page-title').innerHTML = conf.title;
             document.getElementById('page-subtitle').innerHTML = conf.subtitle;
@@ -231,7 +243,7 @@
             renderContent();
         }
         
-        // Close Mobile Menu
+        // Mobilde Menüyü Kapat
         const navBar = document.getElementById('navbarNav');
         if (navBar.classList.contains('show')) {
             new bootstrap.Collapse(navBar).hide();
@@ -239,7 +251,7 @@
         window.scrollTo(0,0);
     }
 
-    // --- GRADE CHANGER ---
+    // --- SINIF DEĞİŞTİRİCİ ---
     function changeGrade(grade, btnElement) {
         currentGrade = grade;
         document.querySelectorAll('#gradeTabs .nav-link').forEach(btn => btn.classList.remove('active'));
@@ -247,27 +259,29 @@
         renderContent();
     }
 
-    // --- RENDER CONTENT ---
+    // --- İÇERİĞİ EKRANA BAS ---
     function renderContent() {
         const container = document.getElementById('content-display');
         
-        // Filter by Grade AND specific Source Mode (e.g. only 'Videos')
+        // 1. Filtreleme: Sınıf + Mod (Source) + Görünürlük
         const items = allData.filter(item => 
             item.grade === currentGrade && 
             item.source === currentMode && 
             item.isVisible !== false
         );
 
+        // 2. Eğer İçerik Yoksa Uyarı Göster
         if (items.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-5">
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light">
                     <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i>
-                    <h5 class="text-muted">No content available for this section yet.</h5>
+                    <h5 class="text-muted fw-bold">No content available yet.</h5>
                     <small class="text-muted">Check back later for updates!</small>
                 </div>`;
             return;
         }
 
+        // 3. İçerik Varsa Kartları Oluştur
         let html = `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
         
         items.forEach(item => {
@@ -289,7 +303,7 @@
                             </div>
                             ${badge}
                             <h5 class="fw-bold mb-2">${displayTitle}</h5>
-                            <p class="text-muted small mb-0">${item.description || 'Click to open.'}</p>
+                            <p class="text-muted small mb-0">${item.description || 'Click to open resource.'}</p>
                         </div>
                     </div>
                 </a>

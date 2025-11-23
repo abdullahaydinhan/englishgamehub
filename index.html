@@ -8,33 +8,105 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-top: 70px; }
-        .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; }
+        
+        /* 1. DÜZELTME: SEKMELERİN RENGİ */
+        .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
+        .nav-pills .nav-link.active { 
+            background-color: #0d6efd !important; 
+            border-color: #0d6efd !important; 
+            color: #ffffff !important; /* Yazı kesinlikle beyaz olacak */
+            transform: scale(1.05); 
+            box-shadow: 0 4px 15px rgba(13,110,253,0.3); 
+        }
+
+        /* NAVBAR */
+        .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; z-index: 1030; }
         .navbar-brand { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
-        .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; position: relative; }
+        .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
         .nav-link.active { color: #0d6efd !important; }
-        .nav-link.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 3px; background: #0d6efd; border-radius: 5px; }
-        .dropdown-item { font-weight: 500; cursor: pointer; padding: 10px 20px; }
-        .dropdown-item:hover { background-color: #f0f7ff; color: #0d6efd; }
-        .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 90px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
+        
+        /* SAĞ YAN MENÜ (SIDEBAR) */
+        .right-sidebar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1040;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .grade-menu-item {
+            position: relative;
+            background-color: #343a40;
+            color: white;
+            padding: 15px 20px;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.2);
+            text-align: right;
+            width: 140px;
+            margin-right: -90px; /* Sadece ucu gözüksün */
+        }
+
+        .grade-menu-item:hover {
+            margin-right: 0; /* Üzerine gelince dışarı çıksın */
+            background-color: #0d6efd;
+            width: 160px;
+        }
+
+        .grade-submenu {
+            display: none; /* Gizli */
+            position: absolute;
+            right: 100%; /* Butonun solunda açıl */
+            top: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            width: 200px;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .grade-menu-item:hover .grade-submenu {
+            display: block; /* Üzerine gelince göster */
+            animation: slideIn 0.3s ease;
+        }
+
+        .submenu-link {
+            display: block;
+            padding: 8px 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .submenu-link:hover { background-color: #f0f7ff; color: #0d6efd; padding-left: 15px; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* KARTLAR */
         .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
-        .icon-box { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.2rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
         /* RENKLER */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
-        .icon-Vocabulary { background-color: #198754; } /* Kelime Bölümü Yeşili */
+        .icon-Vocabulary { background-color: #198754; }
         .icon-Grammar { background-color: #fd7e14; }
         .icon-Slides { background-color: #6f42c1; }
         .icon-Documents { background-color: #0dcaf0; }
-
+        
         .view-section { display: none; animation: fadeIn 0.5s ease; }
         .view-section.active-view { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
-        .nav-pills .nav-link.active { background-color: #0d6efd; border-color: #0d6efd; color: white; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
-        .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
+        .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 60px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
     </style>
 </head>
 <body>
@@ -65,22 +137,65 @@
     </div>
 </nav>
 
+<div class="right-sidebar">
+    <div class="grade-menu-item">
+        <span>9TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+        <div class="grade-submenu">
+            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
+        </div>
+    </div>
+    <div class="grade-menu-item">
+        <span>10TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+        <div class="grade-submenu">
+            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+             <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
+        </div>
+    </div>
+    <div class="grade-menu-item">
+        <span>11TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+        <div class="grade-submenu">
+            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+        </div>
+    </div>
+    <div class="grade-menu-item">
+        <span>12TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+        <div class="grade-submenu">
+            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+        </div>
+    </div>
+</div>
+
 <div id="view-home" class="view-section active-view">
     <div class="hero-section text-center">
         <div class="container">
             <h1 class="display-3 fw-bold mb-3">English Game Hub</h1>
-            <p class="lead mb-4 opacity-75">Interactive Games, Quizzes, and Activities for High School Students.</p>
+            <p class="lead mb-4 opacity-75">Interactive Games, Quizzes, and Activities.</p>
             <div class="d-flex justify-content-center gap-3">
                 <button onclick="switchView('Games')" class="btn btn-light btn-lg rounded-pill fw-bold text-primary px-5 shadow">Play Games</button>
-                <button onclick="switchView('Vocabulary')" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-5 border-2">Vocabulary</button>
+                <button onclick="switchView('Interactive_Activities')" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-5 border-2">Activities</button>
             </div>
         </div>
     </div>
-    <div class="container text-center py-5">
-        <div class="row g-4">
-            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Games')"><i class="fa-solid fa-gamepad fa-3x text-primary mb-3"></i><h4 class="fw-bold">Fun Games</h4><p class="text-muted">Learn vocabulary and grammar while playing fun interactive games.</p></div></div>
-            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Interactive_Activities')"><i class="fa-solid fa-laptop-code fa-3x text-success mb-3"></i><h4 class="fw-bold">Digital Activities</h4><p class="text-muted">Access worksheets, reading passages, and online exercises anywhere.</p></div></div>
-            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open fa-3x text-success mb-3"></i><h4 class="fw-bold">Vocabulary</h4><p class="text-muted">Download word lists, PDFs, and study materials for your exams.</p></div></div>
+    <div class="container py-4">
+        <div class="d-flex align-items-center mb-4">
+            <h3 class="fw-bold m-0"><i class="fa-solid fa-rocket text-primary me-2"></i> New Arrivals</h3>
+            <span class="badge bg-danger ms-3">Fresh Content</span>
+        </div>
+        <div id="home-showcase" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <div class="text-center w-100 py-5"><div class="spinner-border text-primary"></div></div>
         </div>
     </div>
 </div>
@@ -101,10 +216,10 @@
 <div id="view-content" class="view-section container mt-4">
     <div class="text-center mb-5"><h2 id="page-title" class="fw-bold display-6">Library</h2><p id="page-subtitle" class="text-muted">Select your grade to see the materials.</p></div>
     <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs">
-        <li class="nav-item"><button class="nav-link active" onclick="changeGrade('9TH_GRADE', this)">9. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="changeGrade('10TH_GRADE', this)">10. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="changeGrade('11TH_GRADE', this)">11. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="changeGrade('12TH_GRADE', this)">12. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link active" id="btn-9TH_GRADE" onclick="changeGrade('9TH_GRADE', this)">9. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" id="btn-10TH_GRADE" onclick="changeGrade('10TH_GRADE', this)">10. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" id="btn-11TH_GRADE" onclick="changeGrade('11TH_GRADE', this)">11. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" id="btn-12TH_GRADE" onclick="changeGrade('12TH_GRADE', this)">12. Sınıf</button></li>
     </ul>
     <div id="content-display"></div>
 </div>
@@ -117,6 +232,7 @@
     let allData = [];
     let currentMode = 'home'; 
     let currentGrade = '9TH_GRADE';
+    
     const CONFIG = {
         'Games': { title: '🎮 Interactive Games', subtitle: 'Play and learn with our game collection.', icon: 'fa-gamepad' },
         'Interactive_Activities': { title: '🧩 Interactive Activities', subtitle: 'Digital exercises and quizzes.', icon: 'fa-laptop-code' },
@@ -127,11 +243,33 @@
         'Documents': { title: '📄 Documents', subtitle: 'Worksheets and PDFs.', icon: 'fa-file-pdf' }
     };
 
-    fetch('games_data.json').then(r => r.json()).then(d => { allData = d.reverse(); }).catch(e => console.error(e));
+    fetch('games_data.json').then(r => r.json()).then(d => { 
+        allData = d.reverse(); // En yeni en başta
+        renderHomeLatest(); // Ana sayfadaki vitrini doldur
+    }).catch(e => console.error(e));
+
+    // --- YAN MENÜDEN HIZLI GEÇİŞ FONKSİYONU ---
+    function quickNav(grade, mode) {
+        // 1. Önce sayfayı ayarla
+        switchView(mode);
+        // 2. Sonra sınıfı seçili hale getir
+        // Not: switchView zaten renderContent'i çağırır ama sınıfı da set etmemiz lazım.
+        currentGrade = grade;
+        
+        // Butonların aktiflik durumunu güncelle
+        document.querySelectorAll('#gradeTabs .nav-link').forEach(b => b.classList.remove('active'));
+        if(document.getElementById('btn-' + grade)) {
+            document.getElementById('btn-' + grade).classList.add('active');
+        }
+        
+        renderContent();
+        window.scrollTo(0,0);
+    }
 
     function switchView(viewName) {
-        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.navbar .nav-link').forEach(el => el.classList.remove('active'));
         if(document.getElementById('nav-' + viewName)) document.getElementById('nav-' + viewName).classList.add('active');
+        
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
 
         if (viewName === 'home') document.getElementById('view-home').classList.add('active-view');
@@ -156,13 +294,82 @@
         renderContent();
     }
 
-    // --- DOSYA TÜRÜNE GÖRE İKON SEÇİCİ ---
+    // --- ANA SAYFA VİTRİN ALGORİTMASI (EN AZ 4 OYUN) ---
+    function renderHomeLatest() {
+        const container = document.getElementById('home-showcase');
+        
+        // 1. Tüm oyunları bul
+        const allGames = allData.filter(i => i.source === 'Games');
+        // 2. Diğer her şeyi bul
+        const allOthers = allData.filter(i => i.source !== 'Games');
+        
+        let showcaseItems = [];
+        
+        // Önce en yeni 4 oyunu al
+        showcaseItems.push(...allGames.slice(0, 4));
+        
+        // Geriye kalan boşlukları (Toplam 10 olacak şekilde) diğerlerinden doldur
+        // Kalan boşluk sayısı = 10 - Şu anki sayı
+        let needed = 10 - showcaseItems.length;
+        if(needed > 0) {
+            showcaseItems.push(...allOthers.slice(0, needed));
+        }
+
+        // Eğer hala 10 olmadıysa (yeterince other yoksa) kalan oyunlardan ekle
+        if(showcaseItems.length < 10) {
+             let remainingGames = allGames.slice(4); // İlk 4'ten sonrakiler
+             let moreNeeded = 10 - showcaseItems.length;
+             showcaseItems.push(...remainingGames.slice(0, moreNeeded));
+        }
+
+        // HTML oluştur
+        let html = "";
+        showcaseItems.forEach(item => {
+            html += createCardHTML(item);
+        });
+        container.innerHTML = html;
+    }
+
     function getFileIcon(filename) {
         if(filename.endsWith('.pdf')) return 'fa-file-pdf';
         if(filename.endsWith('.docx') || filename.endsWith('.doc')) return 'fa-file-word';
         if(filename.endsWith('.xlsx') || filename.endsWith('.xls')) return 'fa-file-excel';
-        if(filename.endsWith('.html')) return 'fa-globe'; // HTML için dünya ikonu
-        return 'fa-file'; // Bilinmeyen tür
+        if(filename.endsWith('.html')) return 'fa-globe';
+        return 'fa-file';
+    }
+
+    function createCardHTML(item) {
+        const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
+        const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
+        const gradeBadge = `<span class="badge bg-dark text-white position-absolute top-0 end-0 m-2" style="font-size:0.6rem">${item.grade.replace('_GRADE','')}</span>`;
+        
+        let iconClass = 'fa-gamepad'; // Varsayılan
+        let bgClass = 'icon-Games';
+        
+        if (CONFIG[item.source]) {
+            iconClass = CONFIG[item.source].icon;
+            bgClass = 'icon-' + item.source;
+        }
+        if (item.source === 'Vocabulary') {
+            iconClass = getFileIcon(item.name);
+        }
+
+        return `
+            <div class="col">
+                <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
+                    <div class="game-card h-100 position-relative">
+                        ${gradeBadge}
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between">
+                                <div class="icon-box ${bgClass}"><i class="fa-solid ${iconClass}"></i></div>
+                            </div>
+                            ${badge}
+                            <h5 class="fw-bold mb-2 text-truncate">${displayTitle}</h5>
+                            <p class="text-muted small mb-0 text-truncate">${item.description || 'Click to view.'}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>`;
     }
 
     function renderContent() {
@@ -170,23 +377,13 @@
         const items = allData.filter(item => item.grade === currentGrade && item.source === currentMode && item.isVisible !== false);
 
         if (items.length === 0) {
-            container.innerHTML = `<div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light"><i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i><h5 class="text-muted fw-bold">No content available yet.</h5><small class="text-muted">Check back later for updates!</small></div>`;
+            container.innerHTML = `<div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light"><i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i><h5 class="text-muted fw-bold">No content available yet.</h5></div>`;
             return;
         }
 
         let html = `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
         items.forEach(item => {
-            const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
-            const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
-            const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1 float-end"></i>` : '';
-            
-            // Eğer Vocabulary ise özel dosya ikonu kullan, değilse kategori ikonunu kullan
-            let iconClass = CONFIG[currentMode].icon;
-            if (currentMode === 'Vocabulary') {
-                iconClass = getFileIcon(item.name);
-            }
-
-            html += `<div class="col"><a href="${item.path}" class="text-decoration-none text-dark" target="_blank"><div class="game-card h-100 position-relative"><div class="card-body p-4"><div class="d-flex justify-content-between"><div class="icon-box icon-${currentMode}"><i class="fa-solid ${iconClass}"></i></div>${star}</div>${badge}<h5 class="fw-bold mb-2">${displayTitle}</h5><p class="text-muted small mb-0">${item.description || 'Click to view/download.'}</p></div></div></a></div>`;
+            html += createCardHTML(item);
         });
         html += `</div>`;
         container.innerHTML = html;

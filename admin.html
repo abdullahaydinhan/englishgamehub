@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>EGH - Süper Yönetim Paneli</title>
+    <title>EGH - Yönetim Paneli</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -35,6 +35,7 @@
         <div class="col-md-4 text-center">
             <div class="card p-4 shadow">
                 <h5>🔑 Yönetici Girişi</h5>
+                <p class="text-muted small">Kullanıcı: abdullahaydinhan<br>Repo: englishgamehub</p>
                 <input type="password" id="githubToken" class="form-control mb-3" placeholder="GitHub Token...">
                 <button class="btn btn-primary w-100" onclick="verifyAndLoad()">Giriş Yap</button>
             </div>
@@ -63,30 +64,23 @@
 </div>
 
 <datalist id="themeList">
-    <option value="Theme 1">
-    <option value="Theme 2">
-    <option value="Theme 3">
-    <option value="Theme 4">
-    <option value="Theme 5">
-    <option value="Theme 6">
-    <option value="Theme 7">
-    <option value="Theme 8">
-    <option value="Revision">
-    <option value="General">
+    <option value="Theme 1"><option value="Theme 2"><option value="Theme 3"><option value="Theme 4">
+    <option value="Theme 5"><option value="Theme 6"><option value="Theme 7"><option value="Theme 8">
+    <option value="Revision"><option value="General">
 </datalist>
 
 <script>
-    // --- AYARLAR ---
-    const GITHUB_USERNAME = "hunter5234"; 
-    const REPO_NAME = "abdullahaydinhan";
+    // --- GÜNCELLENMİŞ AYARLAR ---
+    const GITHUB_USERNAME = "abdullahaydinhan";  // YENİ KULLANICI ADINIZ
+    const REPO_NAME = "englishgamehub";          // YENİ REPO ADINIZ
     const FILE_PATH = "games_data.json";
 
     let currentData = [];
     let fileSha = "";
 
-    // TÜR SEÇENEKLERİ
     const typeOptions = [
         { val: "Games", label: "🎮 Game" },
+        { val: "Interactive_Activities", label: "🧩 Activity" }, // İnteraktifler için
         { val: "Videos", label: "🎬 Video" },
         { val: "Vocabulary", label: "📖 Vocabulary" },
         { val: "Grammar", label: "✍️ Grammar" },
@@ -109,14 +103,12 @@
             const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${token}` }
             });
-            if (!res.ok) throw new Error("Veri çekilemedi");
+            if (!res.ok) throw new Error("Veri çekilemedi! Kullanıcı adı veya Token hatalı olabilir.");
             
             const data = await res.json();
             fileSha = data.sha;
             currentData = JSON.parse(decodeURIComponent(escape(window.atob(data.content))));
-            
-            // YENİDEN ESKİYE SIRALAMA (Array'i ters çeviriyoruz ki en yeni en üstte olsun)
-            currentData.reverse();
+            currentData.reverse(); // En yeniyi en başa al
 
             renderTable();
             document.getElementById('loginSection').style.display = 'none';
@@ -131,39 +123,27 @@
         currentData.forEach((item, index) => {
             const tr = document.createElement('tr');
             
-            // TÜR SELECT
+            // Tür Seçimi
             let typeSelect = `<select class="form-select form-select-sm type-${item.source}" onchange="updateRow(${index}, 'source', this.value)">`;
             typeOptions.forEach(t => {
                 typeSelect += `<option value="${t.val}" ${item.source === t.val ? 'selected' : ''}>${t.label}</option>`;
             });
             typeSelect += `</select>`;
 
-            // SINIF SELECT
+            // Sınıf Seçimi
             let gradeSelect = `<select class="form-select form-select-sm" onchange="updateRow(${index}, 'grade', this.value)">
                 ${["9TH_GRADE","10TH_GRADE","11TH_GRADE","12TH_GRADE"].map(g => `<option value="${g}" ${item.grade===g?'selected':''}>${g}</option>`).join('')}
             </select>`;
 
             tr.innerHTML = `
-                <td class="text-center">
-                    <input class="form-check-input" type="checkbox" onchange="updateRow(${index}, 'isVisible', this.checked)" ${item.isVisible !== false ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" onchange="updateRow(${index}, 'isFeatured', this.checked)" ${item.isFeatured ? 'checked' : ''}>
-                </td>
+                <td class="text-center"><input class="form-check-input" type="checkbox" onchange="updateRow(${index}, 'isVisible', this.checked)" ${item.isVisible !== false ? 'checked' : ''}></td>
+                <td class="text-center"><input type="checkbox" onchange="updateRow(${index}, 'isFeatured', this.checked)" ${item.isFeatured ? 'checked' : ''}></td>
                 <td>${gradeSelect}</td>
-                <td>
-                    <input type="text" list="themeList" class="form-control form-control-sm" value="${item.unit || ''}" placeholder="Seç veya Yaz" onchange="updateRow(${index}, 'unit', this.value)">
-                </td>
+                <td><input type="text" list="themeList" class="form-control form-control-sm" value="${item.unit || ''}" onchange="updateRow(${index}, 'unit', this.value)"></td>
                 <td>${typeSelect}</td>
-                <td>
-                    <input type="text" class="form-control fw-bold" value="${item.title || ''}" onchange="updateRow(${index}, 'title', this.value)">
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" value="${item.description || ''}" placeholder="Açıklama..." onchange="updateRow(${index}, 'description', this.value)">
-                </td>
-                <td class="text-muted small text-truncate" style="max-width: 150px;" title="${item.path}">
-                    ${item.name}
-                </td>
+                <td><input type="text" class="form-control fw-bold" value="${item.title || ''}" onchange="updateRow(${index}, 'title', this.value)"></td>
+                <td><input type="text" class="form-control form-control-sm" value="${item.description || ''}" onchange="updateRow(${index}, 'description', this.value)"></td>
+                <td class="text-muted small text-truncate" style="max-width: 150px;" title="${item.path}">${item.name}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -176,14 +156,12 @@
     }
 
     async function saveChanges() {
-        if (!confirm("Değişiklikler yayınlansın mı?")) return;
-        
-        // Kaydederken tekrar eskiye doğru sıralamayı düzeltiyoruz (Data Consistency)
-        const dataToSave = [...currentData].reverse();
-
+        if (!confirm("Değişiklikler siteye gönderilsin mi?")) return;
+        const dataToSave = [...currentData].reverse(); // Kaydederken sırayı düzelt
         const token = localStorage.getItem('gh_token');
+        
         const bodyData = {
-            message: "Admin Panel Update 🚀",
+            message: "Admin Update via Panel 🚀",
             content: window.btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2)))),
             sha: fileSha
         };
@@ -194,11 +172,11 @@
                 headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyData)
             });
-            if (!res.ok) throw new Error("Hata oluştu");
+            if (!res.ok) throw new Error("Kaydetme hatası!");
             const data = await res.json();
             fileSha = data.content.sha;
             document.querySelectorAll('.changed-row').forEach(row => row.classList.remove('changed-row'));
-            alert("✅ Kaydedildi!");
+            alert("✅ Başarıyla kaydedildi!");
         } catch (e) { alert(e.message); }
     }
 </script>

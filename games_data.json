@@ -1,70 +1,110 @@
 [
   {
-    "name": "deneme 2",
     "path": "Games/10TH_GRADE/deneme 2/index.html",
-    "type": "dir",
-    "grade": "10TH_GRADE",
-    "source": "Games",
+    "name": "deneme 2",
     "title": "10.2.Milyoner",
     "description": "Have fun",
+    "grade": "10TH_GRADE",
+    "source": "Games",
     "unit": "Theme 2",
+    "badgeColor": "bg-primary",
+    "isFeatured": false,
     "isVisible": false
   },
   {
-    "name": "Suleyman_The_Magnificent.html",
-    "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
-    "type": "file",
-    "grade": "10TH_GRADE",
-    "source": "Interactive_Activities",
+    "path": "Games/9TH_GRADE/9.1.Jeopardy/index.html",
+    "name": "9.1.Jeopardy",
+    "title": "9.1.Jeopardy",
+    "description": "Click to view file.",
+    "grade": "9TH_GRADE",
+    "source": "Games",
+    "unit": "",
+    "badgeColor": "bg-primary",
+    "isFeatured": false,
     "isVisible": true
   },
   {
-    "name": "Unforgettable_Hero.html",
-    "path": "Interactive_Activities/10TH_GRADE/Unforgettable_Hero.html",
-    "type": "file",
-    "grade": "10TH_GRADE",
-    "source": "Interactive_Activities"
-  },
-  {
-    "name": "9.1.Jeopardy",
-    "path": "Games/9TH_GRADE/9.1.Jeopardy/index.html",
-    "type": "dir",
-    "grade": "9TH_GRADE",
-    "source": "Games"
-  },
-  {
-    "name": "Milyoner9_1",
     "path": "Games/9TH_GRADE/Milyoner9_1/index.html",
-    "type": "dir",
+    "name": "Milyoner9_1",
+    "title": "Milyoner9 1",
+    "description": "Click to view file.",
     "grade": "9TH_GRADE",
-    "source": "Games"
+    "source": "Games",
+    "unit": "",
+    "badgeColor": "bg-primary",
+    "isFeatured": false,
+    "isVisible": true
   },
   {
-    "name": "deneme 2",
     "path": "Games/9TH_GRADE/deneme 2/index.html",
-    "type": "dir",
+    "name": "deneme 2",
+    "title": "deneme 2",
+    "description": "Click to view file.",
     "grade": "9TH_GRADE",
-    "source": "Games"
+    "source": "Games",
+    "unit": "",
+    "badgeColor": "bg-primary",
+    "isFeatured": false,
+    "isVisible": true
   },
   {
-    "name": "azerbaijan.html",
+    "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
+    "name": "Suleyman_The_Magnificent.html",
+    "title": "Suleyman The Magnificent",
+    "description": "Click to view file.",
+    "grade": "10TH_GRADE",
+    "source": "Interactive_Activities",
+    "unit": "",
+    "badgeColor": "bg-info",
+    "isFeatured": false,
+    "isVisible": true
+  },
+  {
+    "path": "Interactive_Activities/10TH_GRADE/Unforgettable_Hero.html",
+    "name": "Unforgettable_Hero.html",
+    "title": "Unforgettable Hero",
+    "description": "Click to view file.",
+    "grade": "10TH_GRADE",
+    "source": "Interactive_Activities",
+    "unit": "",
+    "badgeColor": "bg-info",
+    "isFeatured": false,
+    "isVisible": true
+  },
+  {
     "path": "Interactive_Activities/9TH_GRADE/azerbaijan.html",
-    "type": "file",
+    "name": "azerbaijan.html",
+    "title": "azerbaijan",
+    "description": "Click to view file.",
     "grade": "9TH_GRADE",
-    "source": "Interactive_Activities"
+    "source": "Interactive_Activities",
+    "unit": "",
+    "badgeColor": "bg-info",
+    "isFeatured": false,
+    "isVisible": true
   },
   {
-    "name": "chile.html",
     "path": "Interactive_Activities/9TH_GRADE/chile.html",
-    "type": "file",
+    "name": "chile.html",
+    "title": "chile",
+    "description": "Click to view file.",
     "grade": "9TH_GRADE",
-    "source": "Interactive_Activities"
+    "source": "Interactive_Activities",
+    "unit": "",
+    "badgeColor": "bg-info",
+    "isFeatured": false,
+    "isVisible": true
   },
   {
-    "name": "digital.html",
     "path": "Interactive_Activities/9TH_GRADE/digital.html",
-    "type": "file",
+    "name": "digital.html",
+    "title": "digital",
+    "description": "Click to view file.",
     "grade": "9TH_GRADE",
-    "source": "Interactive_Activities"
+    "source": "Interactive_Activities",
+    "unit": "",
+    "badgeColor": "bg-info",
+    "isFeatured": false,
+    "isVisible": true
   }
 ]

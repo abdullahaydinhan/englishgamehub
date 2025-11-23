@@ -14,7 +14,8 @@
     "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
     "type": "file",
     "grade": "10TH_GRADE",
-    "source": "Interactive_Activities"
+    "source": "Interactive_Activities",
+    "isVisible": false
   },
   {
     "name": "Unforgettable_Hero.html",

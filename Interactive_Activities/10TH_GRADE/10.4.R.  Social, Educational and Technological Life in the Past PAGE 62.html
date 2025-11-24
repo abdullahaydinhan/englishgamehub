@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Social, Educational and Technological Life in the Past </title>
+<style>
+  :root{
+    --bg-color:#0f1b2d; --primary-color:#15223a; --secondary-color:#103257;
+    --accent-color:#ff4d6d; --accent-hover-color:#4d3e7a; --text-color:#f5f5f5;
+    --font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--font-family); background:var(--bg-color); color:var(--text-color);
+    line-height:1.6; height:100vh; display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    background:var(--primary-color); padding:15px 20px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.3); min-height:70px;
+  }
+  .title{font-size:24px; font-weight:800}
+  .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  select{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--accent-color);
+    background:var(--secondary-color); color:var(--text-color); font-size:14px; cursor:pointer;
+  }
+  .score-display{font-size:18px; font-weight:700; color:#f39c12; margin-right:8px}
+  button{
+    background:var(--secondary-color); color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer;
+    font-size:16px; font-weight:600; transition:background-color .25s,transform .05s ease;
+  }
+  button:hover{background:var(--accent-hover-color)}
+  main{flex:1; display:flex; flex-direction:column; overflow:hidden; padding:20px; min-height:0}
+  .content-wrapper{display:flex; flex-direction:column; flex:1; min-height:0; gap:20px}
+  .reading{
+    background:var(--secondary-color); padding:24px; border-radius:14px; overflow-y:auto;
+    box-shadow:0 4px 10px rgba(0,0,0,.25); flex:1; min-height:0; display:flex; flex-direction:column
+  }
+  .reading h2{margin-bottom:12px}
+  .reading p{margin-bottom:20px; font-size:20px; text-align:justify}
+  .highlight{
+    background:var(--accent-color);
+    color:#fff;
+    padding:2px 6px;
+    border-radius:6px;
+    font-weight:800;
+    outline:3px solid rgba(255,255,255,.25);
+    box-shadow:0 0 0 3px rgba(255,77,109,.35);
+  }
+  .qbox{background:var(--primary-color); padding:24px; border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  .question{font-size:22px; margin-bottom:18px; font-weight:700}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px}
+  .option{background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; transition:all .2s; font-size:18px; border:2px solid transparent; text-align:center}
+  .option:hover{background:var(--accent-hover-color); transform:translateY(-1px)}
+  .option.selected{background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .answer{display:none; background:#27ae60; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:700}
+  .hint{display:none; background:#34495e; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:600; border-left:4px solid var(--accent-color)}
+  .button-group{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+  input[type="text"],textarea{
+    width:100%; padding:14px; background:var(--secondary-color); color:var(--text-color);
+    border:2px solid var(--accent-hover-color); border-radius:10px; font-size:18px; margin-bottom:10px;
+  }
+  input[type="text"]:focus,textarea:focus{outline:none; border-color:var(--accent-color)}
+  .vocab-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; padding:10px; overflow-y:auto; flex:1}
+  .vocab-card{
+    background:var(--secondary-color); padding:18px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; min-height:110px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; border:2px solid transparent
+  }
+  .vocab-card:hover{transform:translateY(-3px); background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .vocab-card.flipped{background:var(--accent-color); border-color:#fff}
+  .vocab-game-container{display:flex; flex:1; gap:24px; padding:10px; justify-content:center; align-items:flex-start}
+  .vocab-game-column{display:flex; flex-direction:column; gap:10px; width:45%}
+  .vocab-game-card{
+    background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; font-size:18px; font-weight:700; border:3px solid transparent; user-select:none
+  }
+  .vocab-game-card:hover{transform:translateY(-2px); background:var(--accent-hover-color)}
+  .vocab-game-card.selected{border-color:#f39c12; background:var(--accent-hover-color); transform:scale(1.03)}
+  .vocab-game-card.matched{background:#27ae60; border-color:#2ecc71; cursor:default; transform:scale(1)}
+  .vocab-game-card.incorrect{animation:shake .4s; background:#c0392b; border-color:#e74c3c}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  nav{display:flex; flex-direction:column; justify-content:center; align-items:center; padding:14px 20px; background:var(--primary-color); box-shadow:0 -2px 10px rgba(0,0,0,.3); min-height:80px}
+  .progress-container{width:100%; height:10px; background:var(--secondary-color); border-radius:6px; margin-bottom:10px; overflow:hidden}
+  .progress-bar{height:100%; width:0%; background:var(--accent-color); transition:width .25s ease-in-out}
+  .nav-buttons{display:flex; justify-content:space-between; width:100%}
+  #pageIndicator{font-size:18px; font-weight:700}
+  footer{background:var(--secondary-color); padding:12px; text-align:center; font-size:16px; font-weight:600}
+  .completion{display:none; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:30px}
+  .completion h1{font-size:48px; margin-bottom:20px; color:var(--accent-color)}
+  .completion p{font-size:24px; margin-bottom:24px}
+  .final-score{font-size:32px; color:#f39c12; margin-bottom:16px}
+  body.fullscreen-mode .reading p{font-size:24px}
+  body.fullscreen-mode .question{font-size:28px}
+  body.fullscreen-mode .option{font-size:20px; padding:16px}
+  body.fullscreen-mode input[type="text"],body.fullscreen-mode textarea{font-size:26px; padding:18px}
+  body.fullscreen-mode .answer,body.fullscreen-mode .hint{font-size:24px; padding:16px}
+  body.theme-light{--bg-color:#f5f5f5;--primary-color:#e0e0e0;--secondary-color:#ffffff;--accent-color:#3498db;--accent-hover-color:#2980b9;--text-color:#333}
+  body.theme-nature{--bg-color:#2c3e27;--primary-color:#3e4f37;--secondary-color:#4a6b49;--accent-color:#8bc34a;--accent-hover-color:#7cb342;--text-color:#e8f5e9}
+  body.theme-tech{--bg-color:#263238;--primary-color:#37474f;--secondary-color:#455a64;--accent-color:#00bcd4;--accent-hover-color:#00acc1;--text-color:#eceff1}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Social, Educational and Technological Life in the Past </div>
+  <div class="controls">
+    <div class="score-display">Score: <span id="score">0</span></div>
+    <select id="themeSelector" title="Theme">
+      <option value="dark-blue" selected>Dark Blue</option>
+      <option value="light">Light</option>
+      <option value="nature">Nature</option>
+      <option value="tech">Tech</option>
+    </select>
+    <select id="voiceSelector" title="Voice Type">
+      <option value="female" selected>US Female</option>
+      <option value="male">US Male</option>
+    </select>
+    <button id="readBtn">🔊 Read</button>
+    <button id="pauseBtn" style="display:none;">⏸️ Pause</button>
+    <button id="resumeBtn" style="display:none;">▶️ Resume</button>
+    <button id="stopBtn" style="display:none;">⏹️ Stop</button>
+    <button id="fullscreenBtn">⛶ Fullscreen</button>
+  </div>
+</header>
+
+<main>
+  <div class="content-wrapper">
+    <div class="reading" id="reading">
+      <div class="reading-content" id="readingContent"></div>
+    </div>
+
+    <div class="qbox" id="qbox"></div>
+
+    <div class="vocab-grid" id="vocabGrid" style="display:none;"></div>
+    <div class="vocab-game-container" id="vocabGameContainer" style="display:none;"></div>
+
+    <div class="completion" id="completion">
+      <h1>🎉 You've completed all questions!</h1>
+      <div class="final-score">Your Final Score: <span id="finalScore">0</span></div>
+      <p>Great job!</p>
+      <button id="restartBtn">🔄 Restart</button>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="nav-buttons">
+    <button id="prevBtn">⬅️ Previous</button>
+    <span id="pageIndicator">Page 1</span>
+    <button id="nextBtn">Next ➡️</button>
+  </div>
+</nav>
+
+<footer>İnteraktif Öğrenme Uygulaması</footer>
+
+<script>
+/* =========================
+   CONTENT (Social, Educational and Technological Life in the Past )
+   ========================= */
+const TOPIC = "Social, Educational and Technological Life in the Past ";
+const LEVEL = "A2–B1";
+
+/* Reading passage (your text) */
+const PASSAGE = `
+<h2 style="margin-bottom:12px">Social, Educational and Technological Life in the Past </h2>
+<p>After the Middle Ages ended, life was peaceful for many people in the Ottoman territory, but slaves in many parts of the world were fighting for their rights. Islam taught its followers goodness, charity and love. The Ottoman Sultans used to build foundations for charity. Foundations and charities helped to poor. There was honesty in business life, too. Ahî Evran, the Turkish philosopher, used to tell the members of Ahî Foundation to be honest when they bought and sold things.</p>
+<p>During its history, the Ottomans created a characteristic Ottoman culture. So, Ottoman ceremonies, costumes and monuments of İstanbul took place in European paintings. The structure of Ottoman architecture also amazed and influenced the world.</p>
+<p>Ottoman scientists showed remarkable success in science. In the 16th century, Muslims used to know a lot about astronomy to find praying and fasting times and geography to find the direction of Kaaba. The most important Ottoman geographer was Muhyiddin Pîrî Reis. In the meantime in the world, the Polish astronomer Copernicus published his theory that the earth and planets revolved around the sun. A Turkish philosopher İbni Sina wrote the best medicine book of time and Leonardo Da Vinci, an Italian painter, scientist, theorist and architect, drew human organs and body parts very well.</p>
+<p>Education in the Ottoman period was in mektebs and madrasas. The graduates of these institutions used to work for government. The first state school for girls opened in 1858. In 1869, primary education for six to ten-year-old boys and girls was compulsory. So, families began to send their children to school.</p>
+`;
+
+/* Vocabulary list (~40, tap-to-flip) */
+const VOCAB_LIST = [
+  ["Middle Ages","Orta Çağlar"],
+  ["peaceful","barışçıl"],
+  ["Ottoman territory","Osmanlı toprakları"],
+  ["slaves","köleler"],
+  ["rights","haklar"],
+  ["followers","takipçiler"],
+  ["goodness","iyilik"],
+  ["charity","sevgi"],
+  ["love","aşk"],
+  ["foundations","vakıflar"],
+  ["charities","dernekler"],
+  ["poor","fakirler"],
+  ["honesty","dürüstlük"],
+  ["business life","iş hayatı"],
+  ["philosopher","filozof"],
+  ["bought","satın alan"],
+  ["sold","satılan"],
+  ["members","üyeler"],
+  ["scientist","bilim insanı"],
+  ["theorist","kuramcı"],
+  ["architect","mimar"],
+  ["drew","çizdi"],
+  ["human organs","insan organları"],
+  ["body parts","vücut parçaları"],
+  ["praying","namaz kılma"],
+  ["fasting","oruç tutma"],
+  ["direction of Kaaba","Kabe yönü"],
+  ["meantime","zamanında"],
+  ["world","dünya"],
+  ["Polish astronomer","Polonyalı astronom"],
+  ["Copernicus","Kopernik"],
+  ["theory","teori"],
+  ["earth and planets","dünya ve gezegenler"],
+  ["revolved around the sun","güneş etrafında döndü"],
+  ["Turkish philosopher","Türk filozof"],
+  ["medicine book","tıp kitabı"],
+  ["best medicine","en iyi tıp"],
+  ["theorist","kuramcı"],
+  ["architect","mimar"],
+  ["drew","çizdi"],
+  ["body parts","vücut parçaları"],
+  ["institutions","kurumlar"],
+  ["government","hükümet"],
+  ["state school","devlet okulu"],
+  ["girls","kızlar"],
+  ["opened","açıldı"],
+  ["primary education","ilköğretim"],
+  ["six to ten-year-old","altı yaş"],
+  ["compulsory","zorunlu"],
+  ["families","aileler"],
+  ["began to send","göndermeye başladı"],
+];
+
+/* True/False (10) */
+const TF_QUESTIONS = [
+  { prompt:"Life was peaceful for everyone in the Ottoman territory in the Middle Ages.",
+    answer:"True",
+    highlights:["life was peaceful for many people in the Ottoman territory"],
+    hint:"Life conditions (Paragraph 1)."},
+  { prompt:"Slaves were fighting for their rights in many parts of the world.",
+    answer:"True",
+    highlights:["the slaves in many parts of the world were fighting for their rights"],
+    hint:"Social conditions (Paragraph 1)."},
+  { prompt:"Islam taught its followers to be good.",
+    answer:"True",
+    highlights:["Islam taught its followers goodness"],
+    hint:"Religious values (Paragraph 1)."},
+  { prompt:"The Ottoman Sultans used to build foundations for charity.",
+    answer:"True",
+    highlights:["The Ottoman Sultans used to build foundations for charity"],
+    hint:"Rulers' actions (Paragraph 1)."},
+  { prompt:"There was honesty in business life in the past.",
+    answer:"True",
+    highlights:["There was honesty in business life"],
+    hint:"Business ethics (Paragraph 1)."},
+  { prompt:"Ahî Evran was a Turkish philosopher.",
+    answer:"True",
+    highlights:["Ahî Evran, the Turkish philosopher"],
+    hint:"Ottoman scholars (Paragraph 1)."},
+  { prompt:"The Ottoman Sultans used to build foundations for charity.",
+    answer:"True",
+    highlights:["The Ottoman Sultans used to build foundations for charity"],
+    hint:"Rulers' actions (Paragraph 1)."},
+  { prompt:"Ottoman scientists showed remarkable success in science.",
+    answer:"True",
+    highlights:["Ottoman scientists showed remarkable success in science"],
+    hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"In the 16th century, Muslims used to know about astronomy.",
+    answer:"True",
+    highlights:["Muslims used to know a lot about astronomy"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"The most important Ottoman geographer was Muhyiddin Pîrî Reis.",
+    answer:"True",
+    highlights:["The most important Ottoman geographer was Muhyiddin Pîrî Reis"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"The Polish astronomer Copernicus published his theory.",
+    answer:"True",
+    highlights:["the Polish astronomer Copernicus published his theory"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"A Turkish philosopher İbni Sina wrote the best medicine book of time.",
+    answer:"True",
+    highlights:["A Turkish philosopher İbni Sina wrote the best medicine book"],
+    hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"Leonardo Da Vinci drew human organs and body parts very well.",
+    answer:"True",
+    highlights:["Leonardo Da Vinci, an Italian painter, scientist, theorist and architect, drew human organs and body parts very well"],
+    hint:"Scientific achievements (Paragraph 2)."}
+];
+
+/* Multiple Choice (10) */
+const MCQ_QUESTIONS = [
+  { prompt:"What was life like in the Ottoman territory during the Middle Ages?",
+    options:["Warlike and violent","Peaceful and prosperous","Difficult and challenging","Religious and strict"],
+    answer:0, highlights:["life was peaceful for many people in the Ottoman territory"],
+    hint:"Life conditions (Paragraph 1)."},
+  { prompt:"What were slaves fighting for in many parts of the world?",
+    options:["Freedom","Independence","Better living conditions","Political power","Religious freedom"],
+    answer:2, highlights:["the slaves in many parts of the world were fighting for their rights"],
+    hint:"Social conditions (Paragraph 1)."},
+  { prompt:"What did Islam teach its followers?",
+    options:["War and conquest","Wealth and prosperity","Peace and harmony","Obedience and submission"],
+    answer:0, highlights:["Islam taught its followers goodness"],
+    hint:"Religious values (Paragraph 1)."},
+  { prompt:"What did the Ottoman Sultans build for charity?",
+    options:["Military power","Religious buildings","Educational institutions","Foundations for the poor"],
+    answer:2, highlights:["The Ottoman Sultans used to build foundations for charity"],
+    hint:"Rulers' actions (Paragraph 1)."},
+  { prompt:"What was business like in the Ottoman period?",
+    options:["Corrupt and exploitative","Honest and fair","Competitive and challenging"],
+    answer:1, highlights:["There was honesty in business life"],
+    hint:"Business ethics (Paragraph 1)."},
+  { prompt:"Who was Ahî Evran?",
+    options:["A Turkish poet","A Turkish religious leader","A Turkish military commander","A Turkish philosopher"],
+    answer:2, highlights:["Ahî Evran, the Turkish philosopher"],
+    hint:"Ottoman scholars (Paragraph 1)."},
+  { prompt:"What did the Ahî Foundation do?",
+    options:["Promoted education","Supported the poor","Enforced honesty","Collected taxes"],
+    answer:1, highlights:["used to tell the members of Ahî Foundation to be honest when they bought and sold things"],
+    hint:"Business ethics (Paragraph 1)."},
+  { prompt:"What did Ottoman scientists achieve?",
+    options:["Nothing significant","Military victories","Scientific discoveries","Architectural innovations"],
+    answer:1, highlights:["Ottoman scientists showed remarkable success in science"],
+    hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"What did Muslims study in the 16th century?",
+    options:["Nothing important","Astronomy","Mathematics","Literature and art"],
+    answer:1, highlights:["Muslims used to know a lot about astronomy"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"Who was the most important Ottoman geographer?",
+    options:["A European explorer","A Turkish cartographer","An Arab scholar","A Persian scientist"],
+    answer:2, highlights:["The most important Ottoman geographer was Muhyiddin Pîrî Reis"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"What did the Polish astronomer Copernicus publish?",
+    options:["Nothing important","A theory about the sun","A theory about the earth","A book about navigation"],
+    answer:2, highlights:["the Polish astronomer Copernicus published his theory"],
+    hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"Who wrote the best medicine book of time?",
+    options:["A European physician","An Arab scholar","A Persian physician","A Turkish scientist"],
+    answer:2, highlights:["A Turkish philosopher İbni Sina wrote the best medicine book"],
+    hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"What did Leonardo da Vinci specialize in?",
+    options:["Painting only","Science only","Engineering only","Art only","Multiple disciplines"],
+    answer:3, highlights:["Leonardo da Vinci, an Italian painter, scientist, theorist and architect"],
+    hint:"Scientific achievements (Paragraph 2)."}
+];
+
+/* Fill-in-the-Blank (10) */
+const FILL_QUESTIONS = [
+  { prompt:"Life was ______ for many people in the Ottoman territory.", answer:"peaceful",
+    highlights:["life was peaceful for many people in the Ottoman territory"], hint:"Life conditions (Paragraph 1)."},
+  { prompt:"The ______ in many parts of the world were fighting for their ______.", answer:"slaves",
+    highlights:["the slaves in many parts of the world were fighting for their rights"], hint:"Social conditions (Paragraph 1)."},
+  { prompt:"Islam taught its followers to be ______.", answer:"good",
+    highlights:["Islam taught its followers goodness"], hint:"Religious values (Paragraph 1)."},
+  { prompt:"The Ottoman Sultans used to build ______ for charity.", answer:"foundations",
+    highlights:["The Ottoman Sultans used to build foundations for charity"], hint:"Rulers' actions (Paragraph 1)."},
+  { prompt:"There was ______ in business life in the past.", answer:"honesty",
+    highlights:["There was honesty in business life"], hint:"Business ethics (Paragraph 1)."},
+  { prompt:"Ahî Evran was a Turkish ______.", answer:"philosopher",
+    highlights:["Ahî Evran, the Turkish philosopher"], hint:"Ottoman scholars (Paragraph 1)."},
+  { prompt:"Ottoman ______ showed remarkable success in science.", answer:"scientists",
+    highlights:["Ottoman scientists showed remarkable success in science"], hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"In the 16th century, ______ used to know about astronomy.", answer:"Muslims",
+    highlights:["Muslims used to know a lot about astronomy"], hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"The most important Ottoman ______ was Muhyiddin Pîrî Reis.", answer:"geographer",
+    highlights:["The most important Ottoman geographer was Muhyiddin Pîrî Reis"], hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"The Polish ______ Copernicus published his theory.", answer:"astronomer",
+    highlights:["the Polish astronomer Copernicus published his theory"], hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"A Turkish ______ İbni Sina wrote the best medicine book of time.", answer:"philosopher",
+    highlights:["A Turkish philosopher İbni Sina wrote the best medicine book"], hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"Leonardo da Vinci drew human ______ and body parts very well.", answer:"organs",
+    highlights:["Leonardo Da Vinci, an Italian painter, scientist, theorist and architect, drew human organs and body parts very well"], hint:"Scientific achievements (Paragraph 2)."}
+];
+
+/* Open-Ended (10) */
+const OPEN_QUESTIONS = [
+  { prompt:"Describe the social structure in the Ottoman Empire during the Middle Ages.",
+    model:"The Ottoman Empire had a hierarchical social structure with the sultan at the top, followed by nobles, religious scholars, and various classes of citizens. Despite the existence of slavery in some parts of the world, the empire was generally peaceful and prosperous for most of its population.",
+    highlights:["life was peaceful for many people in the Ottoman territory"], hint:"Social structure (Paragraph 1)."},
+  { prompt:"Explain the role of slavery in the Ottoman Empire and world.",
+    model:"Slavery in the Ottoman Empire was primarily for domestic service rather than the harsh chattel slavery seen in the Americas. Slaves had some legal protections and could potentially earn their freedom. In many parts of the world, slavery was a brutal system of oppression.",
+    highlights:["the slaves in many parts of the world were fighting for their rights"], hint:"Social conditions (Paragraph 1)."},
+  { prompt:"Compare the Ottoman approach to charity with modern approaches.",
+    model:"The Ottoman approach to charity was more systematic and institutionalized than modern charity. Sultans established foundations like the Ahî Foundation to help the poor, which provided food, education, and healthcare. This was integrated with Islamic principles of zakat (charitable giving).",
+    highlights:["The Ottoman Sultans used to build foundations for charity"], hint:"Rulers' actions (Paragraph 1)."},
+  { prompt:"Describe the importance of honesty in Ottoman business practices.",
+    model:"Honesty was highly valued in Ottoman business culture. Islamic teachings emphasized truthfulness and fair dealing. Business transactions were often based on trust and reputation. The Ahî Foundation's emphasis on honesty when buying and selling goods helped maintain ethical business practices.",
+    highlights:["There was honesty in business life"], hint:"Business ethics (Paragraph 1)."},
+  { prompt:"Evaluate Ahî Evran's contributions to Ottoman philosophy.",
+    model:"Ahî Evran was a prominent Turkish philosopher who contributed to various fields including theology, ethics, and education. He emphasized reason, moderation, and the importance of balancing material and spiritual life. His works influenced later Ottoman thinkers.",
+    highlights:["Ahî Evran, the Turkish philosopher"], hint:"Ottoman scholars (Paragraph 1)."},
+  { prompt:"Describe the scientific achievements of the Ottoman Empire.",
+    model:"Ottoman scientists made significant contributions to astronomy, mathematics, medicine, and geography. They built observatories, developed new calculation methods, and created detailed maps. The work of scholars like Muhyiddin Pîrî Reis in geography and Taqi al-Din in astronomy advanced scientific knowledge globally.",
+    highlights:["Ottoman scientists showed remarkable success in science"], hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"Compare Ottoman and European education in the 16th-19th centuries.",
+    model:"Ottoman education was primarily religious and focused on Islamic studies until the 19th century reforms. In contrast, European education became more secular and science-based. The first Ottoman state school for girls opened in 1858, showing progress in educational opportunities. European education systems developed more comprehensive curricula and eventually influenced Ottoman educational reforms.",
+    highlights:["The first state school for girls opened in 1858"], hint:"Educational systems (Paragraph 3)."},
+  { prompt:"Explain the significance of Copernicus's heliocentric theory.",
+    model:"Copernicus's theory that the Earth revolves around the sun challenged the geocentric model that had dominated Western thought for centuries. His work was initially controversial but eventually revolutionized astronomy and our understanding of the universe. It demonstrated how scientific knowledge can overturn long-held beliefs.",
+    highlights:["the Polish astronomer Copernicus published his theory"], hint:"Scientific knowledge (Paragraph 2)."},
+  { prompt:"Analyze the Renaissance influence on Ottoman art and architecture.",
+    model:"Ottoman art and architecture developed distinctive styles characterized by domes, minarets, and intricate tilework. This architectural style influenced European architecture, particularly in Eastern Europe. Ottoman ceremonies and monuments in İstanbul represented the empire's wealth and power, which were depicted in European paintings, spreading Ottoman cultural influence.",
+    highlights:["The structure of Ottoman architecture also amazed and influenced the world"], hint:"Cultural achievements (Paragraph 1)."},
+  { prompt:"Describe Leonardo da Vinci's embodiment of Renaissance ideals.",
+    model:"Leonardo da Vinci embodied the Renaissance ideal of a universal person - someone with expertise in multiple fields, insatiable curiosity, and the ability to connect art and science. His anatomical drawings combined scientific precision with artistic beauty, representing the integration of different knowledge systems.",
+    highlights:["Leonardo da Vinci, an Italian painter, scientist, theorist and architect"], hint:"Scientific achievements (Paragraph 2)."},
+  { prompt:"Reflect on how technology has changed daily life and family relationships.",
+    model:"Modern life has brought many conveniences through technology, saving time on household chores and communication. However, some negative aspects include weaker family bonds, less face-to-face interaction, and potentially more sedentary lifestyles.",
+    highlights:["Modern life has brought many conveniences"], hint:"Household technology (Paragraph 1)."},
+  { prompt:"If you could choose one aspect of past life to experience, what would you choose and why?",
+    model:"I would choose to experience the strong community bonds of the past, where people knew and supported each other. While modern conveniences are helpful, I believe the personal connections and sense of belonging in traditional communities had unique value that is sometimes lost in modern society.",
+    highlights:["neighbourhood was very important"], hint:"Community relationships (Paragraph 2)."},
+  { prompt:"What positive and negative changes has modern life brought?",
+    model:"Modern life has brought many conveniences through technology, saving time on household chores. However, some negative aspects include weaker family bonds, less face-to-face interaction, and potentially more sedentary lifestyles.",
+    highlights:["Modern life has brought many conveniences"], hint:"Household technology (Paragraph 1)."}
+];
+
+/* =========================
+   STATE & DOM
+   ========================= */
+let currentSlide = 0;
+let totalSlides = 3 + TF_QUESTIONS.length + MCQ_QUESTIONS.length + FILL_QUESTIONS.length + OPEN_QUESTIONS.length + 1;
+let speechSynthesisObj = window.speechSynthesis;
+let speechUtterance = null;
+let isReading = false, isPaused = false;
+let currentQuestionText = "";
+let score = 0;
+
+let activeHighlights = [];
+
+const readingDiv = document.getElementById('reading');
+const readingContentDiv = document.getElementById('readingContent');
+const qboxDiv = document.getElementById('qbox');
+const vocabGridDiv = document.getElementById('vocabGrid');
+const vocabGameContainerDiv = document.getElementById('vocabGameContainer');
+const completionDiv = document.getElementById('completion');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageIndicator = document.getElementById('pageIndicator');
+const readBtn = document.getElementById('readBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const stopBtn = document.getElementById('stopBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const restartBtn = document.getElementById('restartBtn');
+const themeSelector = document.getElementById('themeSelector');
+const voiceSelector = document.getElementById('voiceSelector');
+const scoreDisplay = document.getElementById('score');
+const finalScoreDisplay = document.getElementById('finalScore');
+const progressBar = document.getElementById('progressBar');
+
+/* Themes */
+const THEMES={'dark-blue':'theme-dark-blue','light':'theme-light','nature':'theme-nature','tech':'theme-tech'};
+function applyTheme(name){document.body.className=THEMES[name]||'';localStorage.setItem('selectedTheme',name)}
+function initTheme(){
+  const saved=localStorage.getItem('selectedTheme');
+  if(saved){themeSelector.value=saved;applyTheme(saved)}
+  themeSelector.addEventListener('change',e=>applyTheme(e.target.value))
+}
+
+/* Progress bar */
+function updateProgressBar(){
+  const progress=(currentSlide/(totalSlides-1))*100;
+  progressBar.style.width=`${progress}%`;
+}
+
+/* INIT */
+function init(){
+  showSlide(currentSlide);
+  setupEventListeners();
+  initTheme();
+  setupFullscreenListener();
+  updateProgressBar();
+  initVoices();
+}
+
+/* Listeners */
+function setupEventListeners(){
+  prevBtn.addEventListener('click',()=>{ if(currentSlide>0){ currentSlide--; showSlide(currentSlide);} });
+  nextBtn.addEventListener('click',()=>{ if(currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide);} });
+  readBtn.addEventListener('click',startReading);
+  pauseBtn.addEventListener('click',pauseReading);
+  resumeBtn.addEventListener('click',resumeReading);
+  stopBtn.addEventListener('click',stopReading);
+  fullscreenBtn.addEventListener('click',toggleFullscreen);
+  restartBtn.addEventListener('click',()=>{ score=0; scoreDisplay.textContent=score; currentSlide=0; showSlide(currentSlide); });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'&&currentSlide>0){ currentSlide--; showSlide(currentSlide); }
+    else if(e.key==='ArrowRight'&&currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide); }
+    else if(e.key.toLowerCase()==='f'){ toggleFullscreen(); }
+  });
+
+  const savedVoice=localStorage.getItem('voicePref');
+  if(savedVoice){ voiceSelector.value=savedVoice; }
+  voiceSelector.addEventListener('change',()=>localStorage.setItem('voicePref',voiceSelector.value));
+}
+
+/* Fullscreen */
+function setupFullscreenListener(){
+  document.addEventListener('fullscreenchange',handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange',handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange',handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange',handleFullscreenChange);
+}
+function handleFullscreenChange(){
+  if(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement||document.msFullscreenElement){
+    document.body.classList.add('fullscreen-mode');
+  }else{
+    document.body.classList.remove('fullscreen-mode');
+  }
+}
+
+/* Slides */
+function showSlide(slideIndex){
+  readingDiv.style.display='none';
+  qboxDiv.style.display='none';
+  vocabGridDiv.style.display='none';
+  vocabGameContainerDiv.style.display='none';
+  completionDiv.style.display='none';
+
+  stopReading();
+  activeHighlights = [];
+  readingContentDiv.innerHTML = PASSAGE;
+
+  pageIndicator.textContent=`Page ${slideIndex+1}`;
+  updateProgressBar();
+
+  if(slideIndex===0){
+    vocabGridDiv.style.display='grid';
+    showVocabulary();
+  }else if(slideIndex===1){
+    vocabGameContainerDiv.style.display='flex';
+    showVocabGame();
+  }else if(slideIndex===2){
+    readingDiv.style.display='block';
+  }else if(slideIndex===totalSlides-1){
+    completionDiv.style.display='flex';
+    finalScoreDisplay.textContent=score;
+  }else{
+    readingDiv.style.display='block';
+    qboxDiv.style.display='block';
+
+    const questionIndex=slideIndex-3;
+    if(questionIndex<TF_QUESTIONS.length){
+      showTFQuestion(TF_QUESTIONS[questionIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length){
+      const mcqIndex=questionIndex-TF_QUESTIONS.length;
+      showMCQQuestion(MCQ_QUESTIONS[mcqIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length+FILL_QUESTIONS.length){
+      const fillIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length;
+      showFillQuestion(FILL_QUESTIONS[fillIndex]);
+    }else{
+      const openIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length-FILL_QUESTIONS.length;
+      showOpenQuestion(OPEN_QUESTIONS[openIndex]);
+    }
+  }
+}
+
+/* Vocab Cards */
+function showVocabulary(){
+  vocabGridDiv.innerHTML='';
+  VOCAB_LIST.forEach(([en,tr])=>{
+    const card=document.createElement('div');
+    card.className='vocab-card'; card.textContent=en;
+    card.addEventListener('click',function(){
+      if(!this.classList.contains('flipped')){ this.classList.add('flipped'); this.textContent=tr; }
+      else{ this.classList.remove('flipped'); this.textContent=en; }
+    });
+    vocabGridDiv.appendChild(card);
+  });
+}
+
+/* Vocab Matching Game */
+let selectedEnglishCard=null, matchedPairs=new Set(), usedVocabIndices=new Set(), currentVocabGameWords=[];
+function getRandomVocabWords(count){
+  const available=[]; for(let i=0;i<VOCAB_LIST.length;i++) if(!usedVocabIndices.has(i)) available.push(i);
+  if(available.length===0){ usedVocabIndices.clear(); for(let i=0;i<VOCAB_LIST.length;i++) available.push(i); }
+  const actual=Math.min(count,available.length); const selected=[];
+  for(let i=0;i<actual;i++){ const idx=Math.floor(Math.random()*available.length); const pick=available[idx]; selected.push(pick); usedVocabIndices.add(pick); available.splice(idx,1); }
+  return selected.map(i=>VOCAB_LIST[i]);
+}
+function showVocabGame(){
+  selectedEnglishCard=null; matchedPairs.clear();
+  currentVocabGameWords=getRandomVocabWords(10);
+  vocabGameContainerDiv.innerHTML="";
+  const englishColumn=document.createElement('div'); englishColumn.className='vocab-game-column';
+  const turkishColumn=document.createElement('div'); turkishColumn.className='vocab-game-column';
+
+  currentVocabGameWords.forEach((pair,index)=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=pair[0];
+    card.dataset.index=index; card.dataset.type='english'; card.addEventListener('click',handleCardClick);
+    englishColumn.appendChild(card);
+  });
+
+  const shuffled=currentVocabGameWords.map((p,idx)=>({word:p[1],originalIndex:idx})).sort(()=>Math.random()-0.5);
+  shuffled.forEach(item=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=item.word;
+    card.dataset.index=item.originalIndex; card.dataset.type='turkish'; card.addEventListener('click',handleCardClick);
+    turkishColumn.appendChild(card);
+  });
+
+  vocabGameContainerDiv.appendChild(englishColumn);
+  vocabGameContainerDiv.appendChild(turkishColumn);
+}
+function handleCardClick(e){
+  const card=e.target; const type=card.dataset.type; const index=parseInt(card.dataset.index);
+  if(matchedPairs.has(index)) return;
+  if(type==='english'){
+    if(selectedEnglishCard) selectedEnglishCard.classList.remove('selected');
+    card.classList.add('selected'); selectedEnglishCard=card;
+  }else if(type==='turkish'){
+    if(!selectedEnglishCard) return;
+    const englishIndex=parseInt(selectedEnglishCard.dataset.index);
+    if(englishIndex===index){
+      card.classList.add('matched'); selectedEnglishCard.classList.add('matched'); matchedPairs.add(index);
+      score+=10; scoreDisplay.textContent=score;
+      selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      if(matchedPairs.size===currentVocabGameWords.length){
+        setTimeout(()=>{
+          vocabGameContainerDiv.innerHTML=`<div class="game-message">🎉 All matched!</div>
+          <div class="game-controls"><button id="playAgainBtn">🔄 Play Again</button></div>`;
+          document.getElementById('playAgainBtn').addEventListener('click',showVocabGame);
+        },400);
+      }
+    }else{
+      card.classList.add('incorrect'); selectedEnglishCard.classList.add('incorrect');
+      setTimeout(()=>{
+        card.classList.remove('incorrect'); selectedEnglishCard.classList.remove('incorrect'); selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      },700);
+    }
+  }
+}
+
+/* ===== Question Renders (Show Answer -> addHighlights from PASSAGE) ===== */
+function showTFQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">
+      <div class="option" data-value="True">True</div>
+      <div class="option" data-value="False">False</div>
+    </div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showMCQQuestion(q){
+  currentQuestionText=q.prompt;
+  let optionsHTML=''; q.options.forEach((opt,idx)=>optionsHTML+=`<div class="option" data-value="${idx}">${opt}</div>`);
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">${optionsHTML}</div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.options[q.answer]}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showFillQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <input type="text" id="fillAnswer" placeholder="Type your answer here"/>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showOpenQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <textarea id="openAnswer" placeholder="Type your answer here" rows="4"></textarea>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Model Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Model Answer: ${q.model}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+/* ===== Sally-Style Highlight (ROBUST FINAL VERSION) ===== */
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function addHighlights(phrases){
+  let html = PASSAGE;
+  const sorted = [...phrases].filter(Boolean).sort((a, b) => b.length - a.length);
+
+  sorted.forEach(phrase => {
+    // This function builds a highly flexible regex pattern from a phrase.
+    const buildPattern = (p) => {
+      const parts = p.split(/\s+/); // Split phrase into words/parts
+      const regexParts = parts.map(part => {
+        // Handle: ellipsis wildcard
+        if (part === '...') {
+          return '[\\s\\S]*?'; // Match any non-greedy sequence of non-whitespace characters
+        }
+        // For other words, escape them and allow for optional HTML tags/whitespace
+        return `${escapeRegExp(part)}(?:<[^>]*>)?\\s*`;
+      });
+      return regexParts.join('');
+    };
+
+    const finalPattern = buildPattern(phrase);
+    const rx = new RegExp(`(${finalPattern})`, 'gi');
+    html = html.replace(rx, '<span class="highlight">$1</span>');
+  });
+
+  readingContentDiv.innerHTML = html;
+
+  const first = readingContentDiv.querySelector('.highlight');
+  if(first){
+    first.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+/* TTS */
+let cachedVoices=[];
+function initVoices(){
+  function load(){ cachedVoices=speechSynthesis.getVoices(); }
+  load();
+  if(typeof speechSynthesis!=="undefined"){ speechSynthesis.onvoiceschanged=load; }
+}
+function pickEnUSVoice(preferMale=false){
+  const enUS=cachedVoices.filter(v=>/en[-_]?US/i.test(v.lang||"")||/English \(United States\)/i.test(v.name||""));
+  const femaleHints=["Female","Aria","Jenny","Samantha","Zira","Google US English","Ana"];
+  const maleHints=["Male","Guy","David","Mark","Christopher","Eric","John"];
+  const hints=preferMale?maleHints:femaleHints;
+  const hit=enUS.find(v=>hints.some(h=>(v.name||"").toLowerCase().includes(h.toLowerCase())));
+  if(hit) return hit;
+  if(enUS.length) return enUS[0];
+  const enAny=cachedVoices.filter(v=>/^en/i.test(v.lang||""));
+  if(enAny.length) return enAny[0];
+  return null;
+}
+function startReading(){
+  if(isReading&&!isPaused) return;
+  if(isPaused){ resumeReading(); return; }
+  let textToRead="";
+  if(currentSlide>=3&&currentSlide<totalSlides-1) textToRead=currentQuestionText;
+  else textToRead=readingContentDiv.innerText;
+  speechUtterance=new SpeechSynthesisUtterance(textToRead);
+  const preferMale=(voiceSelector.value==='male');
+  const voice=pickEnUSVoice(preferMale); if(voice) speechUtterance.voice=voice;
+  speechUtterance.lang='en-US'; speechUtterance.rate=.95;
+  speechUtterance.onend=()=>{ stopReading(); };
+  speechSynthesisObj.speak(speechUtterance);
+  isReading=true; isPaused=false;
+  readBtn.style.display='none'; pauseBtn.style.display='inline-block'; stopBtn.style.display='inline-block';
+}
+function pauseReading(){ if(!isReading||isPaused) return; speechSynthesisObj.pause(); isPaused=true; pauseBtn.style.display='none'; resumeBtn.style.display='inline-block';}
+function resumeReading(){ if(!isReading||!isPaused) return; speechSynthesisObj.resume(); isPaused=false; resumeBtn.style.display='none'; pauseBtn.style.display='inline-block';}
+function stopReading(){
+  if(!isReading) return;
+  speechSynthesisObj.cancel(); isReading=false; isPaused=false;
+  readBtn.style.display='inline-block'; pauseBtn.style.display='none'; resumeBtn.style.display='none'; stopBtn.style.display='none';
+}
+
+/* Fullscreen */
+function toggleFullscreen(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+
+/* Start */
+document.addEventListener('DOMContentLoaded',()=>{ readingContentDiv.innerHTML=PASSAGE; init(); });
+</script>
+</body>
+</html>

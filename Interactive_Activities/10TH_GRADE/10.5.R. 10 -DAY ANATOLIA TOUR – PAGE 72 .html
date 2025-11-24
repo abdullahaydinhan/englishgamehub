@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>10-Day Anatolia Tour – Interactive Learning</title>
+<style>
+  :root{
+    --bg-color:#0f1b2d; --primary-color:#15223a; --secondary-color:#103257;
+    --accent-color:#ff4d6d; --accent-hover-color:#4d3e7a; --text-color:#f5f5f5;
+    --font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--font-family); background:var(--bg-color); color:var(--text-color);
+    line-height:1.6; height:100vh; display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    background:var(--primary-color); padding:15px 20px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.3); min-height:70px;
+  }
+  .title{font-size:24px; font-weight:800}
+  .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  select{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--accent-color);
+    background:var(--secondary-color); color:var(--text-color); font-size:14px; cursor:pointer;
+  }
+  .score-display{font-size:18px; font-weight:700; color:#f39c12; margin-right:8px}
+  button{
+    background:var(--secondary-color); color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer;
+    font-size:16px; font-weight:600; transition:background-color .25s,transform .05s ease;
+  }
+  button:hover{background:var(--accent-hover-color)}
+  main{flex:1; display:flex; flex-direction:column; overflow:hidden; padding:20px; min-height:0}
+  .content-wrapper{display:flex; flex-direction:column; flex:1; min-height:0; gap:20px}
+  .reading{
+    background:var(--secondary-color); padding:24px; border-radius:14px; overflow-y:auto;
+    box-shadow:0 4px 10px rgba(0,0,0,.25); flex:1; min-height:0; display:flex; flex-direction:column
+  }
+  .reading h2{margin-bottom:12px}
+  .reading p{margin-bottom:20px; font-size:20px; text-align:justify}
+  .reading strong{color:#f7d794}
+  .highlight{
+    background:var(--accent-color);
+    color:#fff;
+    padding:2px 6px;
+    border-radius:6px;
+    font-weight:800;
+    outline:3px solid rgba(255,255,255,.25);
+    box-shadow:0 0 0 3px rgba(255,77,109,.35);
+  }
+  .qbox{background:var(--primary-color); padding:24px; border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  .question{font-size:22px; margin-bottom:18px; font-weight:700}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px}
+  .option{background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; transition:all .2s; font-size:18px; border:2px solid transparent; text-align:center}
+  .option:hover{background:var(--accent-hover-color); transform:translateY(-1px)}
+  .option.selected{background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .answer{display:none; background:#27ae60; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:700}
+  .hint{display:none; background:#34495e; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:600; border-left:4px solid var(--accent-color)}
+  .button-group{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+  input[type="text"],textarea{
+    width:100%; padding:14px; background:var(--secondary-color); color:var(--text-color);
+    border:2px solid var(--accent-hover-color); border-radius:10px; font-size:18px; margin-bottom:10px;
+  }
+  input[type="text"]:focus,textarea:focus{outline:none; border-color:var(--accent-color)}
+  .vocab-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; padding:10px; overflow-y:auto; flex:1}
+  .vocab-card{
+    background:var(--secondary-color); padding:18px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; min-height:110px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; border:2px solid transparent
+  }
+  .vocab-card:hover{transform:translateY(-3px); background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .vocab-card.flipped{background:var(--accent-color); border-color:#fff}
+  .vocab-game-container{display:flex; flex:1; gap:24px; padding:10px; justify-content:center; align-items:flex-start}
+  .vocab-game-column{display:flex; flex-direction:column; gap:10px; width:45%}
+  .vocab-game-card{
+    background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; font-size:18px; font-weight:700; border:3px solid transparent; user-select:none
+  }
+  .vocab-game-card:hover{transform:translateY(-2px); background:var(--accent-hover-color)}
+  .vocab-game-card.selected{border-color:#f39c12; background:var(--accent-hover-color); transform:scale(1.03)}
+  .vocab-game-card.matched{background:#27ae60; border-color:#2ecc71; cursor:default; transform:scale(1)}
+  .vocab-game-card.incorrect{animation:shake .4s; background:#c0392b; border-color:#e74c3c}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  nav{display:flex; flex-direction:column; justify-content:center; align-items:center; padding:14px 20px; background:var(--primary-color); box-shadow:0 -2px 10px rgba(0,0,0,.3); min-height:80px}
+  .progress-container{width:100%; height:10px; background:var(--secondary-color); border-radius:6px; margin-bottom:10px; overflow:hidden}
+  .progress-bar{height:100%; width:0%; background:var(--accent-color); transition:width .25s ease-in-out}
+  .nav-buttons{display:flex; justify-content:space-between; width:100%}
+  #pageIndicator{font-size:18px; font-weight:700}
+  footer{background:var(--secondary-color); padding:12px; text-align:center; font-size:16px; font-weight:600}
+  .completion{display:none; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:30px}
+  .completion h1{font-size:48px; margin-bottom:20px; color:var(--accent-color)}
+  .completion p{font-size:24px; margin-bottom:24px}
+  .final-score{font-size:32px; color:#f39c12; margin-bottom:16px}
+  body.fullscreen-mode .reading p{font-size:24px}
+  body.fullscreen-mode .question{font-size:28px}
+  body.fullscreen-mode .option{font-size:20px; padding:16px}
+  body.fullscreen-mode input[type="text"],body.fullscreen-mode textarea{font-size:26px; padding:18px}
+  body.fullscreen-mode .answer,body.fullscreen-mode .hint{font-size:24px; padding:16px}
+  body.theme-light{--bg-color:#f5f5f5;--primary-color:#e0e0e0;--secondary-color:#ffffff;--accent-color:#3498db;--accent-hover-color:#2980b9;--text-color:#333}
+  body.theme-nature{--bg-color:#2c3e27;--primary-color:#3e4f37;--secondary-color:#4a6b49;--accent-color:#8bc34a;--accent-hover-color:#7cb342;--text-color:#e8f5e9}
+  body.theme-tech{--bg-color:#263238;--primary-color:#37474f;--secondary-color:#455a64;--accent-color:#00bcd4;--accent-hover-color:#00acc1;--text-color:#eceff1}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">10-Day Anatolia Tour</div>
+  <div class="controls">
+    <div class="score-display">Score: <span id="score">0</span></div>
+    <select id="themeSelector" title="Theme">
+      <option value="dark-blue" selected>Dark Blue</option>
+      <option value="light">Light</option>
+      <option value="nature">Nature</option>
+      <option value="tech">Tech</option>
+    </select>
+    <select id="voiceSelector" title="Voice Type">
+      <option value="female" selected>US Female</option>
+      <option value="male">US Male</option>
+    </select>
+    <button id="readBtn">🔊 Read</button>
+    <button id="pauseBtn" style="display:none;">⏸️ Pause</button>
+    <button id="resumeBtn" style="display:none;">▶️ Resume</button>
+    <button id="stopBtn" style="display:none;">⏹️ Stop</button>
+    <button id="fullscreenBtn">⛶ Fullscreen</button>
+  </div>
+</header>
+
+<main>
+  <div class="content-wrapper">
+    <div class="reading" id="reading">
+      <div class="reading-content" id="readingContent"></div>
+    </div>
+
+    <div class="qbox" id="qbox"></div>
+
+    <div class="vocab-grid" id="vocabGrid" style="display:none;"></div>
+    <div class="vocab-game-container" id="vocabGameContainer" style="display:none;"></div>
+
+    <div class="completion" id="completion">
+      <h1>🎉 You've completed all questions!</h1>
+      <div class="final-score">Your Final Score: <span id="finalScore">0</span></div>
+      <p>Great job!</p>
+      <button id="restartBtn">🔄 Restart</button>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="nav-buttons">
+    <button id="prevBtn">⬅️ Previous</button>
+    <span id="pageIndicator">Page 1</span>
+    <button id="nextBtn">Next ➡️</button>
+  </div>
+</nav>
+
+<footer>Bu çalışma İngilizce Öğretmeni Abdullah AYDINHAN tarafından yapılmıştır.</footer>
+
+<script>
+/* =========================
+   CONTENT (10-Day Anatolia Tour)
+   ========================= */
+const TOPIC = "10-Day Anatolia Tour";
+const LEVEL = "A2–B1";
+
+/* Reading passage (from user) */
+const PASSAGE = `
+<h2 style="margin-bottom:12px">10-Day Anatolia Tour</h2>
+<p><strong>Day 1, Friday</strong><br>
+Welcome to İstanbul. We'll pick you up from the airport and transfer you to the hotel. Free time to explore İstanbul. Overnight in İstanbul.</p>
+<p><strong>Day 2, Saturday</strong><br>
+You'll tour the exotic old city visiting the Blue Mosque, the Hagia Sophia Grand Mosque, Topkapı Palace and the Hippodrome. Enjoy an optional "Half-day Bosphorus cruise" in the afternoon. Overnight in İstanbul.</p>
+<p><strong>Day 3, Sunday</strong><br>
+After breakfast we'll drive towards the nation's capital, Ankara to visit Anıtkabir, the Mausoleum of Atatürk, the great Turkish leader. Then, departure to Cappadocia. Overnight in Cappadocia.</p>
+<p><strong>Day 4, Monday</strong><br>
+You'll tour the Göreme open-air museum, Uçhisar Castle and Kaymaklı underground city. Visit a carpet village to learn how to make traditional Turkish carpets. Don't miss the optional Turkish folklore evening with folk dancing and belly dancers. Overnight in Cappadocia.</p>
+<p><strong>Day 5, Tuesday</strong><br>
+Leaving Cappadocia, we will head south and stop at Konya to tour the Mevlana Museum. Overnight in Pamukkale, Denizli.</p>
+<p><strong>Day 6, Wednesday</strong><br>
+We'll visit the ruins of Hierapolis, the Temple of Apollo, Necropolis and walk over the magnificent white calcium terraces of Pamukkale. Then, we'll drive to Aphrodisias, home of the famous temple of Aphrodite. Overnight in Kuşadası, Aydın.</p>
+<p><strong>Day 7, Thursday</strong><br>
+You will go back to the past and enjoy history while you are touring Ephesus and visiting the Temple of Artemis. In the afternoon it is possible to buy leather goods. Overnight in Kuşadası.</p>
+<p><strong>Day 8, Friday</strong><br>
+After breakfast, it is time to drive along the Aegean coast to the ancient city of Pergamum. You'll visit the magnificent Acropolis of Pergamum, the temples and the library. Then, driving to the legendary city of Troy. Overnight in Çanakkale.</p>
+<p><strong>Day 9, Saturday</strong><br>
+You'll visit the Gallipoli Battlefields, cemeteries, memorials, the war museum and listen to mysterious war stories. Driving back to İstanbul.</p>
+<p><strong>Day 10, Sunday</strong><br>
+Saying goodbye to our guests and transfer to the airport.</p>
+`;
+
+/* Vocabulary list (~40, tap-to-flip) */
+const VOCAB_LIST = [
+  ["airport","havalimanı"],
+  ["transfer","transfer etmek"],
+  ["explore","keşfetmek"],
+  ["overnight","gece konaklama"],
+  ["old city","eski şehir"],
+  ["Blue Mosque","Sultanahmet Camii"],
+  ["Hagia Sophia Grand Mosque","Ayasofya-i Kebir Cami"],
+  ["Topkapı Palace","Topkapı Sarayı"],
+  ["Hippodrome","Hipodrom"],
+  ["Bosphorus cruise","Boğaz turu"],
+  ["capital","başkent"],
+  ["mausoleum","mozole"],
+  ["leader","lider"],
+  [" underground city"," yeraltı şehri"],
+  ["carpet village","halı köyü"],
+  ["folklore evening","folklor gecesi"],
+  ["belly dancers","oryantal dansçılar"],
+  ["Temple of Apollo","Apollon Tapınağı"],
+  ["Necropolis","Nekropol"],
+  ["calcium terraces","kalsiyum terasları"],
+  ["Aphrodisias","Afrodisyas"],
+  ["Aphrodite","Afrodit"],
+  ["Ephesus","Efes"],
+  ["Temple of Artemis","Artemis Tapınağı"],
+  ["leather goods","deri ürünleri"],
+  ["Pergamum","Bergama"],
+  ["Acropolis","Akropol"],
+  ["Troy","Truva"],
+  ["Gallipoli Battlefields","Gelibolu Savaş Alanları"],
+  ["memorials","anıtlar"],
+  ["war museum","savaş müzesi"]
+];
+
+/* True/False (10) */
+const TF_QUESTIONS = [
+  { prompt:"On Day 1, guests are transferred from the airport to the hotel.",
+    answer:"True",
+    highlights:["We'll pick you up from the airport and transfer you to the hotel"],
+    hint:"Day 1."},
+  { prompt:"An optional Bosphorus cruise is offered on Day 2.",
+    answer:"True",
+    highlights:["Enjoy an optional \"Half-day Bosphorus cruise\" in the afternoon"],
+    hint:"Day 2."},
+  { prompt:"On Day 3, the tour first visits Cappadocia and then drives to Ankara.",
+    answer:"False",
+    highlights:["we'll drive towards the nation's capital, Ankara to visit Anıtkabir","Then, departure to Cappadocia"],
+    hint:"Order of visits on Day 3."},
+  { prompt:"The Göreme open-air museum is included on Day 4.",
+    answer:"True",
+    highlights:["You'll tour the Göreme open-air museum"],
+    hint:"Day 4."},
+  { prompt:"Konya and the Mevlana Museum are visited on Day 5.",
+    answer:"True",
+    highlights:["stop at Konya to tour the Mevlana Museum"],
+    hint:"Day 5."},
+  { prompt:"On Day 6, the tour visits the Temple of Apollo and the Necropolis in Hierapolis.",
+    answer:"True",
+    highlights:["visit the ruins of Hierapolis, the Temple of Apollo, Necropolis"],
+    hint:"Day 6."},
+  { prompt:"Ephesus is visited on Day 8.",
+    answer:"False",
+    highlights:["You will go back to the past... touring Ephesus"],
+    hint:"Check which day includes Ephesus."},
+  { prompt:"Visitors may buy leather goods in the afternoon on Day 7.",
+    answer:"True",
+    highlights:["In the afternoon it is possible to buy leather goods"],
+    hint:"Day 7."},
+  { prompt:"The ancient city of Pergamum is visited after breakfast on Day 8.",
+    answer:"True",
+    highlights:["After breakfast, it is time to drive along the Aegean coast to the ancient city of Pergamum"],
+    hint:"Day 8."},
+  { prompt:"On Day 9, the group visits Gallipoli Battlefields and then drives back to İstanbul.",
+    answer:"True",
+    highlights:["You'll visit the Gallipoli Battlefields... Driving back to İstanbul"],
+    hint:"Day 9."}
+];
+
+/* Multiple Choice (10) */
+const MCQ_QUESTIONS = [
+  { prompt:"Which sites are visited in İstanbul on Day 2?",
+    options:["Dolmabahçe Palace and Galata Tower","Blue Mosque, Hagia Sophia, Topkapı Palace, Hippodrome","Grand Bazaar and Spice Bazaar","Rumeli Fortress and Maiden's Tower"],
+    answer:1, highlights:["the Blue Mosque, the Hagia Sophia Grand Mosque, Topkapı Palace and the Hippodrome"], hint:"Day 2 list."},
+  { prompt:"Where do you visit Anıtkabir?",
+    options:["İstanbul","Ankara","Konya","Çanakkale"],
+    answer:1, highlights:["Ankara to visit Anıtkabir"], hint:"Day 3."},
+  { prompt:"Which of the following is part of the Day 4 program?",
+    options:["Dolmabahçe Palace","Aspendos Theatre","Göreme open-air museum","Sumela Monastery"],
+    answer:2, highlights:["You'll tour the Göreme open-air museum"], hint:"Cappadocia day."},
+  { prompt:"On Day 5, where do you stop after leaving Cappadocia?",
+    options:["Konya","Antalya","Bursa","Gaziantep"],
+    answer:0, highlights:["stop at Konya to tour the Mevlana Museum"], hint:"Day 5."},
+  { prompt:"Which natural wonder do you walk over on Day 6?",
+    options:["Travertines of Pamukkale","Fairy chimneys","Mount Ararat glacier","Lake Van beaches"],
+    answer:0, highlights:["walk over the magnificent white calcium terraces of Pamukkale"], hint:"Day 6."},
+  { prompt:"After Pamukkale on Day 6, where do you drive next?",
+    options:["Ephesus","Aphrodisias","Pergamum","Troy"],
+    answer:1, highlights:["Then, we'll drive to Aphrodisias"], hint:"Day 6."},
+  { prompt:"Which ancient city do you tour on Day 7?",
+    options:["Pergamum","Troy","Ephesus","Hierapolis"],
+    answer:2, highlights:["touring Ephesus"], hint:"Day 7."},
+  { prompt:"What notable complex is visited in Pergamum on Day 8?",
+    options:["Theatre of Aspendos","Acropolis","Library of Celsus","Temple of Zeus"],
+    answer:1, highlights:["the magnificent Acropolis of Pergamum"], hint:"Day 8."},
+  { prompt:"Where do you stay overnight after visiting Troy?",
+    options:["İzmir","Bursa","Çanakkale","Ankara"],
+    answer:2, highlights:["Overnight in Çanakkale"], hint:"End of Day 8."},
+  { prompt:"Which of the following is part of Day 9?",
+    options:["Sumela Monastery","Gallipoli Battlefields","Mount Nemrut statues","Ani ruins"],
+    answer:1, highlights:["You'll visit the Gallipoli Battlefields"], hint:"Day 9."}
+];
+
+/* Fill-in-the-Blank (10) */
+const FILL_QUESTIONS = [
+  { prompt:"On Day 1, guests are transferred from the ______ to the hotel.", answer:"airport",
+    highlights:["from the airport and transfer you to the hotel"], hint:"Day 1."},
+  { prompt:"An optional Half-day ______ cruise is offered on Day 2.", answer:"Bosphorus",
+    highlights:["optional \"Half-day Bosphorus cruise\""], hint:"Day 2."},
+  { prompt:"Anıtkabir is the Mausoleum of ______.", answer:"Atatürk",
+    highlights:["the Mausoleum of Atatürk"], hint:"Day 3."},
+  { prompt:"Uçhisar ______ and Kaymaklı underground city are visited on Day 4.", answer:"Castle",
+    highlights:["Uçhisar Castle and Kaymaklı underground city"], hint:"Day 4."},
+  { prompt:"On Day 5, the tour stops at ______ to visit the Mevlana Museum.", answer:"Konya",
+    highlights:["stop at Konya to tour the Mevlana Museum"], hint:"Day 5."},
+  { prompt:"The white ______ terraces of Pamukkale are walked over on Day 6.", answer:"calcium",
+    highlights:["white calcium terraces of Pamukkale"], hint:"Day 6."},
+  { prompt:"Aphrodisias is home of the famous temple of ______.", answer:"Aphrodite",
+    highlights:["home of the famous temple of Aphrodite"], hint:"Day 6."},
+  { prompt:"On Day 7, visitors tour ______ and see the Temple of Artemis.", answer:"Ephesus",
+    highlights:["touring Ephesus and visiting the Temple of Artemis"], hint:"Day 7."},
+  { prompt:"On Day 8 you visit the Acropolis of ______.", answer:"Pergamum",
+    highlights:["the magnificent Acropolis of Pergamum"], hint:"Day 8."},
+  { prompt:"On Day 9, the tour visits the ______ Battlefields and the war museum.", answer:"Gallipoli",
+    highlights:["You'll visit the Gallipoli Battlefields, cemeteries, memorials, the war museum"], hint:"Day 9."}
+];
+
+/* Open-Ended (10) */
+const OPEN_QUESTIONS = [
+  { prompt:"Summarize the main activities on Day 2 in İstanbul.",
+    model:"On Day 2, the tour visits the Blue Mosque, the Hagia Sophia Grand Mosque, Topkapı Palace and the Hippodrome, with an optional Half-day Bosphorus cruise in the afternoon.",
+    highlights:["the Blue Mosque, the Hagia Sophia Grand Mosque, Topkapı Palace and the Hippodrome","optional \"Half-day Bosphorus cruise\""], hint:"List the sites and option."},
+  { prompt:"Explain the plan for Day 3.",
+    model:"After breakfast, the group drives to Ankara to visit Anıtkabir and then departs to Cappadocia for an overnight stay.",
+    highlights:["drive towards the nation's capital, Ankara to visit Anıtkabir","Then, departure to Cappadocia"], hint:"Order matters."},
+  { prompt:"What cultural experiences are suggested on Day 4?",
+    model:"Day 4 includes visiting a carpet village to learn traditional carpet-making and an optional Turkish folklore evening with folk dancing and belly dancers.",
+    highlights:["Visit a carpet village to learn how to make traditional Turkish carpets","optional Turkish folklore evening with folk dancing and belly dancers"], hint:"Day 4 details."},
+  { prompt:"Describe the highlights of Day 6.",
+    model:"The tour visits Hierapolis including the Temple of Apollo and the Necropolis, walks on the white calcium terraces of Pamukkale, then drives to Aphrodisias.",
+    highlights:["visit the ruins of Hierapolis, the Temple of Apollo, Necropolis","walk over the magnificent white calcium terraces of Pamukkale","drive to Aphrodisias"], hint:"Day 6 sequence."},
+  { prompt:"What historical site is the focus on Day 7 and what can visitors buy in the afternoon?",
+    model:"Day 7 focuses on Ephesus and the Temple of Artemis, and in the afternoon visitors can buy leather goods.",
+    highlights:["touring Ephesus and visiting the Temple of Artemis","In the afternoon it is possible to buy leather goods"], hint:"Day 7."},
+  { prompt:"Outline the route and visits on Day 8.",
+    model:"After breakfast, the group drives along the Aegean coast to Pergamum to see the Acropolis, temples, and library, then continues to Troy and stays overnight in Çanakkale.",
+    highlights:["drive along the Aegean coast to the ancient city of Pergamum","visit the magnificent Acropolis of Pergamum, the temples and the library","driving to the legendary city of Troy","Overnight in Çanakkale"], hint:"Day 8 full flow."},
+  { prompt:"What places are visited on Day 9 and what happens afterward?",
+    model:"On Day 9, the group visits the Gallipoli Battlefields, cemeteries, memorials, and the war museum, and then drives back to İstanbul.",
+    highlights:["You'll visit the Gallipoli Battlefields, cemeteries, memorials, the war museum","Driving back to İstanbul"], hint:"Day 9."},
+  { prompt:"Which Anatolian cities are used as overnight bases during the tour?",
+    model:"İstanbul, Cappadocia, Pamukkale (Denizli), Kuşadası (Aydın), Çanakkale.",
+    highlights:["Overnight in İstanbul","Overnight in Cappadocia","Overnight in Pamukkale, Denizli","Overnight in Kuşadası, Aydın","Overnight in Çanakkale"], hint:"Scan each day for 'Overnight'."},
+  { prompt:"Identify two museums mentioned in the itinerary and the days they are visited.",
+    model:"Göreme open-air museum on Day 4; the war museum on Day 9.",
+    highlights:["Göreme open-air museum","the war museum"], hint:"Find 'museum' mentions."},
+  { prompt:"What farewell activity is mentioned for Day 10?",
+    model:"Saying goodbye to the guests and transferring them to the airport.",
+    highlights:["Saying goodbye to our guests and transfer to the airport"], hint:"Day 10."}
+];
+
+/* =========================
+   STATE & DOM
+   ========================= */
+let currentSlide = 0;
+let totalSlides = 3 + TF_QUESTIONS.length + MCQ_QUESTIONS.length + FILL_QUESTIONS.length + OPEN_QUESTIONS.length + 1;
+let speechSynthesisObj = window.speechSynthesis;
+let speechUtterance = null;
+let isReading = false, isPaused = false;
+let currentQuestionText = "";
+let score = 0;
+
+let activeHighlights = [];
+
+const readingDiv = document.getElementById('reading');
+const readingContentDiv = document.getElementById('readingContent');
+const qboxDiv = document.getElementById('qbox');
+const vocabGridDiv = document.getElementById('vocabGrid');
+const vocabGameContainerDiv = document.getElementById('vocabGameContainer');
+const completionDiv = document.getElementById('completion');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageIndicator = document.getElementById('pageIndicator');
+const readBtn = document.getElementById('readBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const stopBtn = document.getElementById('stopBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const restartBtn = document.getElementById('restartBtn');
+const themeSelector = document.getElementById('themeSelector');
+const voiceSelector = document.getElementById('voiceSelector');
+const scoreDisplay = document.getElementById('score');
+const finalScoreDisplay = document.getElementById('finalScore');
+const progressBar = document.getElementById('progressBar');
+
+/* Themes */
+const THEMES={'dark-blue':'theme-dark-blue','light':'theme-light','nature':'theme-nature','tech':'theme-tech'};
+function applyTheme(name){document.body.className=THEMES[name]||'';localStorage.setItem('selectedTheme',name)}
+function initTheme(){
+  const saved=localStorage.getItem('selectedTheme');
+  if(saved){themeSelector.value=saved;applyTheme(saved)}
+  themeSelector.addEventListener('change',e=>applyTheme(e.target.value))
+}
+
+/* Progress bar */
+function updateProgressBar(){
+  const progress=(currentSlide/(totalSlides-1))*100;
+  progressBar.style.width=`${progress}%`;
+}
+
+/* INIT */
+function init(){
+  showSlide(currentSlide);
+  setupEventListeners();
+  initTheme();
+  setupFullscreenListener();
+  updateProgressBar();
+  initVoices();
+}
+
+/* Listeners */
+function setupEventListeners(){
+  prevBtn.addEventListener('click',()=>{ if(currentSlide>0){ currentSlide--; showSlide(currentSlide);} });
+  nextBtn.addEventListener('click',()=>{ if(currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide);} });
+  readBtn.addEventListener('click',startReading);
+  pauseBtn.addEventListener('click',pauseReading);
+  resumeBtn.addEventListener('click',resumeReading);
+  stopBtn.addEventListener('click',stopReading);
+  fullscreenBtn.addEventListener('click',toggleFullscreen);
+  restartBtn.addEventListener('click',()=>{ score=0; scoreDisplay.textContent=score; currentSlide=0; showSlide(currentSlide); });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'&&currentSlide>0){ currentSlide--; showSlide(currentSlide); }
+    else if(e.key==='ArrowRight'&&currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide); }
+    else if(e.key.toLowerCase()==='f'){ toggleFullscreen(); }
+  });
+
+  const savedVoice=localStorage.getItem('voicePref');
+  if(savedVoice){ voiceSelector.value=savedVoice; }
+  voiceSelector.addEventListener('change',()=>localStorage.setItem('voicePref',voiceSelector.value));
+}
+
+/* Fullscreen */
+function setupFullscreenListener(){
+  document.addEventListener('fullscreenchange',handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange',handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange',handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange',handleFullscreenChange);
+}
+function handleFullscreenChange(){
+  if(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement||document.msFullscreenElement){
+    document.body.classList.add('fullscreen-mode');
+  }else{
+    document.body.classList.remove('fullscreen-mode');
+  }
+}
+
+/* Slides */
+function showSlide(slideIndex){
+  readingDiv.style.display='none';
+  qboxDiv.style.display='none';
+  vocabGridDiv.style.display='none';
+  vocabGameContainerDiv.style.display='none';
+  completionDiv.style.display='none';
+
+  stopReading();
+  activeHighlights = [];
+  readingContentDiv.innerHTML = PASSAGE;
+
+  pageIndicator.textContent=`Page ${slideIndex+1}`;
+  updateProgressBar();
+
+  if(slideIndex===0){
+    vocabGridDiv.style.display='grid';
+    showVocabulary();
+  }else if(slideIndex===1){
+    vocabGameContainerDiv.style.display='flex';
+    showVocabGame();
+  }else if(slideIndex===2){
+    readingDiv.style.display='block';
+  }else if(slideIndex===totalSlides-1){
+    completionDiv.style.display='flex';
+    finalScoreDisplay.textContent=score;
+  }else{
+    readingDiv.style.display='block';
+    qboxDiv.style.display='block';
+
+    const questionIndex=slideIndex-3;
+    if(questionIndex<TF_QUESTIONS.length){
+      showTFQuestion(TF_QUESTIONS[questionIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length){
+      const mcqIndex=questionIndex-TF_QUESTIONS.length;
+      showMCQQuestion(MCQ_QUESTIONS[mcqIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length+FILL_QUESTIONS.length){
+      const fillIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length;
+      showFillQuestion(FILL_QUESTIONS[fillIndex]);
+    }else{
+      const openIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length-FILL_QUESTIONS.length;
+      showOpenQuestion(OPEN_QUESTIONS[openIndex]);
+    }
+  }
+}
+
+/* Vocab Cards */
+function showVocabulary(){
+  vocabGridDiv.innerHTML='';
+  VOCAB_LIST.forEach(([en,tr])=>{
+    const card=document.createElement('div');
+    card.className='vocab-card'; card.textContent=en;
+    card.addEventListener('click',function(){
+      if(!this.classList.contains('flipped')){ this.classList.add('flipped'); this.textContent=tr; }
+      else{ this.classList.remove('flipped'); this.textContent=en; }
+    });
+    vocabGridDiv.appendChild(card);
+  });
+}
+
+/* Vocab Matching Game */
+let selectedEnglishCard=null, matchedPairs=new Set(), usedVocabIndices=new Set(), currentVocabGameWords=[];
+function getRandomVocabWords(count){
+  const available=[]; for(let i=0;i<VOCAB_LIST.length;i++) if(!usedVocabIndices.has(i)) available.push(i);
+  if(available.length===0){ usedVocabIndices.clear(); for(let i=0;i<VOCAB_LIST.length;i++) available.push(i); }
+  const actual=Math.min(count,available.length); const selected=[];
+  for(let i=0;i<actual;i++){ const idx=Math.floor(Math.random()*available.length); const pick=available[idx]; selected.push(pick); usedVocabIndices.add(pick); available.splice(idx,1); }
+  return selected.map(i=>VOCAB_LIST[i]);
+}
+function showVocabGame(){
+  selectedEnglishCard=null; matchedPairs.clear();
+  currentVocabGameWords=getRandomVocabWords(10);
+  vocabGameContainerDiv.innerHTML="";
+  const englishColumn=document.createElement('div'); englishColumn.className='vocab-game-column';
+  const turkishColumn=document.createElement('div'); turkishColumn.className='vocab-game-column';
+
+  currentVocabGameWords.forEach((pair,index)=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=pair[0];
+    card.dataset.index=index; card.dataset.type='english'; card.addEventListener('click',handleCardClick);
+    englishColumn.appendChild(card);
+  });
+
+  const shuffled=currentVocabGameWords.map((p,idx)=>({word:p[1],originalIndex:idx})).sort(()=>Math.random()-0.5);
+  shuffled.forEach(item=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=item.word;
+    card.dataset.index=item.originalIndex; card.dataset.type='turkish'; card.addEventListener('click',handleCardClick);
+    turkishColumn.appendChild(card);
+  });
+
+  vocabGameContainerDiv.appendChild(englishColumn);
+  vocabGameContainerDiv.appendChild(turkishColumn);
+}
+function handleCardClick(e){
+  const card=e.target; const type=card.dataset.type; const index=parseInt(card.dataset.index);
+  if(matchedPairs.has(index)) return;
+  if(type==='english'){
+    if(selectedEnglishCard) selectedEnglishCard.classList.remove('selected');
+    card.classList.add('selected'); selectedEnglishCard=card;
+  }else if(type==='turkish'){
+    if(!selectedEnglishCard) return;
+    const englishIndex=parseInt(selectedEnglishCard.dataset.index);
+    if(englishIndex===index){
+      card.classList.add('matched'); selectedEnglishCard.classList.add('matched'); matchedPairs.add(index);
+      score+=10; scoreDisplay.textContent=score;
+      selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      if(matchedPairs.size===currentVocabGameWords.length){
+        setTimeout(()=>{
+          vocabGameContainerDiv.innerHTML=`<div class="game-message">🎉 All matched!</div>
+          <div class="game-controls"><button id="playAgainBtn">🔄 Play Again</button></div>`;
+          document.getElementById('playAgainBtn').addEventListener('click',showVocabGame);
+        },400);
+      }
+    }else{
+      card.classList.add('incorrect'); selectedEnglishCard.classList.add('incorrect');
+      setTimeout(()=>{
+        card.classList.remove('incorrect'); selectedEnglishCard.classList.remove('incorrect'); selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      },700);
+    }
+  }
+}
+
+/* ===== Highlight (robust) ===== */
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function addHighlights(phrases){
+  let html = PASSAGE;
+  const sorted = [...phrases].filter(Boolean).sort((a, b) => b.length - a.length);
+
+  sorted.forEach(phrase => {
+    const buildPattern = (p) => {
+      const parts = p.split(/\s+/);
+      const regexParts = parts.map(part => {
+        if (part === '...') { return '[\\s\\S]*?'; }
+        return `${escapeRegExp(part)}(?:<[^>]*>)?\\s*`;
+      });
+      return regexParts.join('');
+    };
+
+    const finalPattern = buildPattern(phrase);
+    const rx = new RegExp(`(${finalPattern})`, 'gi');
+    html = html.replace(rx, '<span class="highlight">$1</span>');
+  });
+
+  readingContentDiv.innerHTML = html;
+  const first = readingContentDiv.querySelector('.highlight');
+  if(first){ first.scrollIntoView({behavior:'smooth', block:'center'}); }
+}
+
+/* TTS */
+let cachedVoices=[];
+function initVoices(){
+  function load(){ cachedVoices=speechSynthesis.getVoices(); }
+  load();
+  if(typeof speechSynthesis!=="undefined"){ speechSynthesis.onvoiceschanged=load; }
+}
+function pickEnUSVoice(preferMale=false){
+  const enUS=cachedVoices.filter(v=>/en[-_]?US/i.test(v.lang||"")||/English \(United States\)/i.test(v.name||""));
+  const femaleHints=["Female","Aria","Jenny","Samantha","Zira","Google US English","Ana"];
+  const maleHints=["Male","Guy","David","Mark","Christopher","Eric","John"];
+  const hints=preferMale?maleHints:femaleHints;
+  const hit=enUS.find(v=>hints.some(h=>(v.name||"").toLowerCase().includes(h.toLowerCase())));
+  if(hit) return hit;
+  if(enUS.length) return enUS[0];
+  const enAny=cachedVoices.filter(v=>/^en/i.test(v.lang||""));
+  if(enAny.length) return enAny[0];
+  return null;
+}
+function startReading(){
+  if(isReading&&!isPaused) return;
+  if(isPaused){ resumeReading(); return; }
+  let textToRead="";
+  if(currentSlide>=3&&currentSlide<totalSlides-1) textToRead=currentQuestionText;
+  else textToRead=readingContentDiv.innerText;
+  speechUtterance=new SpeechSynthesisUtterance(textToRead);
+  const preferMale=(voiceSelector.value==='male');
+  const voice=pickEnUSVoice(preferMale); if(voice) speechUtterance.voice=voice;
+  speechUtterance.lang='en-US'; speechUtterance.rate=.95;
+  speechUtterance.onend=()=>{ stopReading(); };
+  speechSynthesisObj.speak(speechUtterance);
+  isReading=true; isPaused=false;
+  readBtn.style.display='inline-block';
+  pauseBtn.style.display='inline-block'; stopBtn.style.display='inline-block';
+}
+function pauseReading(){ if(!isReading||isPaused) return; speechSynthesisObj.pause(); isPaused=true; pauseBtn.style.display='none'; resumeBtn.style.display='inline-block';}
+function resumeReading(){ if(!isReading||!isPaused) return; speechSynthesisObj.resume(); isPaused=false; resumeBtn.style.display='none'; pauseBtn.style.display='inline-block';}
+function stopReading(){
+  if(!isReading) return;
+  speechSynthesisObj.cancel(); isReading=false; isPaused=false;
+  readBtn.style.display='inline-block'; pauseBtn.style.display='none'; resumeBtn.style.display='none'; stopBtn.style.display='none';
+}
+
+/* Fullscreen */
+function toggleFullscreen(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+
+/* ===== Questions UI Renders ===== */
+function showTFQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">
+      <div class="option" data-value="True">True</div>
+      <div class="option" data-value="False">False</div>
+    </div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showMCQQuestion(q){
+  currentQuestionText=q.prompt;
+  let optionsHTML=''; q.options.forEach((opt,idx)=>optionsHTML+=`<div class="option" data-value="${idx}">${opt}</div>`);
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">${optionsHTML}</div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.options[q.answer]}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showFillQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <input type="text" id="fillAnswer" placeholder="Type your answer here"/>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showOpenQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <textarea id="openAnswer" placeholder="Type your answer here" rows="4"></textarea>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Model Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Model Answer: ${q.model}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+/* Start */
+function initStart(){ readingContentDiv.innerHTML=PASSAGE; init(); }
+
+document.addEventListener('DOMContentLoaded',initStart);
+</script>
+</body>
+</html>

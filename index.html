@@ -9,93 +9,115 @@
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-top: 70px; }
         
-        /* 1. DÜZELTME: SEKMELERİN RENGİ */
-        .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
-        .nav-pills .nav-link.active { 
-            background-color: #0d6efd !important; 
-            border-color: #0d6efd !important; 
-            color: #ffffff !important; /* Yazı kesinlikle beyaz olacak */
-            transform: scale(1.05); 
-            box-shadow: 0 4px 15px rgba(13,110,253,0.3); 
-        }
-
         /* NAVBAR */
         .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; z-index: 1030; }
         .navbar-brand { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
         .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
         .nav-link.active { color: #0d6efd !important; }
-        
-        /* SAĞ YAN MENÜ (SIDEBAR) */
-        .right-sidebar {
+
+        /* SOL YAN MENÜ (SIDEBAR) - GÜNCELLENDİ */
+        .left-sidebar {
             position: fixed;
-            right: 0;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1040;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         .grade-menu-item {
             position: relative;
-            background-color: #343a40;
+            background-color: #343a40; /* Koyu renk */
             color: white;
-            padding: 15px 20px;
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
+            width: 50px; /* Kapalıyken sadece ikon genişliği */
+            height: 50px;
+            border-radius: 0 12px 12px 0; /* Sağ köşeleri yuvarla */
+            display: flex;
+            align-items: center;
+            justify-content: center; /* İkonu ortala */
             cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Havalı animasyon */
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
             font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: -2px 2px 10px rgba(0,0,0,0.2);
-            text-align: right;
-            width: 140px;
-            margin-right: -90px; /* Sadece ucu gözüksün */
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .grade-menu-item span {
+            display: none; /* Yazı başta gizli */
+            margin-left: 10px;
         }
 
         .grade-menu-item:hover {
-            margin-right: 0; /* Üzerine gelince dışarı çıksın */
+            width: 160px; /* Üzerine gelince uza */
             background-color: #0d6efd;
-            width: 160px;
+            justify-content: flex-start; /* Yazıyı sola hizala */
+            padding-left: 15px;
         }
 
+        .grade-menu-item:hover span {
+            display: inline-block; /* Yazıyı göster */
+        }
+
+        /* Sınıf Menüsü İkonları (Yuvarlaklar) */
+        .grade-icon {
+            font-size: 1.2rem;
+            font-weight: 800;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        /* Açılır Alt Menü (Submenu) */
         .grade-submenu {
-            display: none; /* Gizli */
+            display: none;
             position: absolute;
-            right: 100%; /* Butonun solunda açıl */
+            left: 100%; /* Butonun sağında açıl */
             top: 0;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.15);
             width: 200px;
             padding: 10px;
             text-align: left;
+            margin-left: 10px; /* Biraz boşluk bırak */
         }
 
         .grade-menu-item:hover .grade-submenu {
-            display: block; /* Üzerine gelince göster */
-            animation: slideIn 0.3s ease;
-        }
-
-        .submenu-link {
             display: block;
-            padding: 8px 10px;
-            color: #333;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            transition: 0.2s;
+            animation: fadeInRight 0.3s ease;
         }
-        .submenu-link:hover { background-color: #f0f7ff; color: #0d6efd; padding-left: 15px; }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        /* ÖZELLEŞTİRİLMİŞ SINIF ETİKETLERİ (BADGES) - YENİ */
+        .grade-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+        
+        /* Her Sınıf İçin Özel Renkler */
+        .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); } /* Mavi */
+        .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); } /* Yeşil */
+        .badge-11 { background: linear-gradient(45deg, #fce38a, #f38181); color: #333 !important; } /* Turuncu/Sarı */
+        .badge-12 { background: linear-gradient(45deg, #ff416c, #ff4b2b); } /* Kırmızı */
+
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
         /* KARTLAR */
         .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        /* RENKLER */
+        /* İKON RENKLERİ */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
@@ -104,9 +126,15 @@
         .icon-Slides { background-color: #6f42c1; }
         .icon-Documents { background-color: #0dcaf0; }
         
+        /* DİĞER CSS */
         .view-section { display: none; animation: fadeIn 0.5s ease; }
         .view-section.active-view { display: block; }
         .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 60px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
+        .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
+        .nav-pills .nav-link.active { background-color: #0d6efd !important; border-color: #0d6efd !important; color: #ffffff !important; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
+        .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
+        .submenu-link { display: block; padding: 8px 10px; color: #333; text-decoration: none; border-radius: 5px; font-size: 0.9rem; transition: 0.2s; }
+        .submenu-link:hover { background-color: #f0f7ff; color: #0d6efd; padding-left: 15px; }
     </style>
 </head>
 <body>
@@ -137,40 +165,40 @@
     </div>
 </nav>
 
-<div class="right-sidebar">
-    <div class="grade-menu-item">
-        <span>9TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+<div class="left-sidebar">
+    <div class="grade-menu-item" title="9th Grade Menu">
+        <div class="grade-icon">9</div> <span>9TH GRADE</span>
         <div class="grade-submenu">
-            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">9th Grade Content</div>
             <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
             <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
             <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
             <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
         </div>
     </div>
-    <div class="grade-menu-item">
-        <span>10TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+    <div class="grade-menu-item" title="10th Grade Menu">
+        <div class="grade-icon">10</div> <span>10TH GRADE</span>
         <div class="grade-submenu">
-            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">10th Grade Content</div>
             <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
             <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
             <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
-             <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
         </div>
     </div>
-    <div class="grade-menu-item">
-        <span>11TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+    <div class="grade-menu-item" title="11th Grade Menu">
+        <div class="grade-icon">11</div> <span>11TH GRADE</span>
         <div class="grade-submenu">
-            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">11th Grade Content</div>
             <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
             <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
             <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
         </div>
     </div>
-    <div class="grade-menu-item">
-        <span>12TH GRADE</span> <i class="fa-solid fa-chevron-left ms-2"></i>
+    <div class="grade-menu-item" title="12th Grade Menu">
+        <div class="grade-icon">12</div> <span>12TH GRADE</span>
         <div class="grade-submenu">
-            <div class="text-muted small mb-2 border-bottom pb-1">Quick Access</div>
+            <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">12th Grade Content</div>
             <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
             <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
             <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
@@ -244,24 +272,17 @@
     };
 
     fetch('games_data.json').then(r => r.json()).then(d => { 
-        allData = d.reverse(); // En yeni en başta
-        renderHomeLatest(); // Ana sayfadaki vitrini doldur
+        allData = d.reverse(); 
+        renderHomeLatest(); 
     }).catch(e => console.error(e));
 
-    // --- YAN MENÜDEN HIZLI GEÇİŞ FONKSİYONU ---
     function quickNav(grade, mode) {
-        // 1. Önce sayfayı ayarla
         switchView(mode);
-        // 2. Sonra sınıfı seçili hale getir
-        // Not: switchView zaten renderContent'i çağırır ama sınıfı da set etmemiz lazım.
         currentGrade = grade;
-        
-        // Butonların aktiflik durumunu güncelle
         document.querySelectorAll('#gradeTabs .nav-link').forEach(b => b.classList.remove('active'));
         if(document.getElementById('btn-' + grade)) {
             document.getElementById('btn-' + grade).classList.add('active');
         }
-        
         renderContent();
         window.scrollTo(0,0);
     }
@@ -294,39 +315,23 @@
         renderContent();
     }
 
-    // --- ANA SAYFA VİTRİN ALGORİTMASI (EN AZ 4 OYUN) ---
     function renderHomeLatest() {
         const container = document.getElementById('home-showcase');
-        
-        // 1. Tüm oyunları bul
         const allGames = allData.filter(i => i.source === 'Games');
-        // 2. Diğer her şeyi bul
         const allOthers = allData.filter(i => i.source !== 'Games');
-        
         let showcaseItems = [];
         
-        // Önce en yeni 4 oyunu al
         showcaseItems.push(...allGames.slice(0, 4));
-        
-        // Geriye kalan boşlukları (Toplam 10 olacak şekilde) diğerlerinden doldur
-        // Kalan boşluk sayısı = 10 - Şu anki sayı
         let needed = 10 - showcaseItems.length;
-        if(needed > 0) {
-            showcaseItems.push(...allOthers.slice(0, needed));
-        }
-
-        // Eğer hala 10 olmadıysa (yeterince other yoksa) kalan oyunlardan ekle
+        if(needed > 0) showcaseItems.push(...allOthers.slice(0, needed));
         if(showcaseItems.length < 10) {
-             let remainingGames = allGames.slice(4); // İlk 4'ten sonrakiler
+             let remainingGames = allGames.slice(4);
              let moreNeeded = 10 - showcaseItems.length;
              showcaseItems.push(...remainingGames.slice(0, moreNeeded));
         }
 
-        // HTML oluştur
         let html = "";
-        showcaseItems.forEach(item => {
-            html += createCardHTML(item);
-        });
+        showcaseItems.forEach(item => { html += createCardHTML(item); });
         container.innerHTML = html;
     }
 
@@ -341,24 +346,25 @@
     function createCardHTML(item) {
         const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
         const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
-        const gradeBadge = `<span class="badge bg-dark text-white position-absolute top-0 end-0 m-2" style="font-size:0.6rem">${item.grade.replace('_GRADE','')}</span>`;
         
-        let iconClass = 'fa-gamepad'; // Varsayılan
+        // Sınıfa Göre Renkli Badge Oluştur
+        const gradeNum = item.grade.replace('TH_GRADE', ''); // '9', '10' vb.
+        const gradeBadgeClass = `badge-${gradeNum}`;
+        const gradeLabel = `<span class="grade-badge ${gradeBadgeClass}">${gradeNum}TH</span>`;
+        
+        let iconClass = 'fa-gamepad'; 
         let bgClass = 'icon-Games';
-        
         if (CONFIG[item.source]) {
             iconClass = CONFIG[item.source].icon;
             bgClass = 'icon-' + item.source;
         }
-        if (item.source === 'Vocabulary') {
-            iconClass = getFileIcon(item.name);
-        }
+        if (item.source === 'Vocabulary') iconClass = getFileIcon(item.name);
 
         return `
             <div class="col">
                 <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
                     <div class="game-card h-100 position-relative">
-                        ${gradeBadge}
+                        ${gradeLabel}
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between">
                                 <div class="icon-box ${bgClass}"><i class="fa-solid ${iconClass}"></i></div>
@@ -382,9 +388,7 @@
         }
 
         let html = `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
-        items.forEach(item => {
-            html += createCardHTML(item);
-        });
+        items.forEach(item => { html += createCardHTML(item); });
         html += `</div>`;
         container.innerHTML = html;
     }

@@ -72,42 +72,6 @@
     "isVisible": true
   },
   {
-    "path": "Interactive_Activities/9TH_GRADE/azerbaijan.html",
-    "name": "azerbaijan.html",
-    "title": "azerbaijan",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Interactive_Activities",
-    "unit": "",
-    "badgeColor": "bg-info",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
-    "path": "Interactive_Activities/9TH_GRADE/chile.html",
-    "name": "chile.html",
-    "title": "chile",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Interactive_Activities",
-    "unit": "",
-    "badgeColor": "bg-info",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
-    "path": "Interactive_Activities/9TH_GRADE/digital.html",
-    "name": "digital.html",
-    "title": "digital",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Interactive_Activities",
-    "unit": "",
-    "badgeColor": "bg-info",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
     "path": "Vocabulary/9TH_GRADE/9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.docx",
     "name": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST.docx",
     "title": "9TH GRADE REVISION AND UNIT 1 VOCABULARY LIST",

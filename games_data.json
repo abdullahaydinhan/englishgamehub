@@ -142,5 +142,17 @@
     "badgeColor": "bg-success",
     "isFeatured": false,
     "isVisible": true
+  },
+  {
+    "path": "Videos/9TH_GRADE/UNIT 1 KELİMELER.html",
+    "name": "UNIT 1 KELİMELER.html",
+    "title": "UNIT 1 KELİMELER",
+    "description": "Click to view content.",
+    "grade": "9TH_GRADE",
+    "source": "Videos",
+    "unit": "",
+    "badgeColor": "bg-danger",
+    "isFeatured": false,
+    "isVisible": true
   }
 ]

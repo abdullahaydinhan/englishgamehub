@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="appTitle">Smart Board Word Matching Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes confetti { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); 
+            background-size: 400% 400%; 
+            animation: gradientShift 15s ease infinite; 
+            margin: 0; 
+            padding: 10px 10px 80px 10px; 
+            min-height: 100vh; 
+            position: relative; 
+        }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: confetti 3s linear; pointer-events: none; }
+        
+        .container { display: flex; justify-content: space-between; margin: 20px auto; max-width: 1100px; gap: 25px; position: relative; z-index: 1; }
+        .word-list { width: 48%; display: flex; flex-direction: column; gap: 12px; }
+        
+        .word {
+            width: 100%; padding: 18px 20px; position: relative; display: flex; align-items: center;
+            font-size: 17px; font-weight: 600; cursor: pointer; user-select: none; touch-action: manipulation;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 60px; border-radius: 15px;
+            backdrop-filter: blur(10px); overflow: hidden; animation: fadeInUp 0.5s ease;
+        }
+        
+        #questionsList .word {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+            box-shadow: 0 8px 32px rgba(255, 165, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            color: #2d2d2d; border: 2px solid transparent;
+        }
+        
+        #questionsList .word:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 40px rgba(255, 165, 0, 0.5); }
+        
+        #answersList .word {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            color: white; border: 2px solid transparent;
+        }
+        
+        #answersList .word:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5); }
+        
+        .word.selected {
+            border: 3px solid #FF1493 !important;
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.8) !important;
+            transform: translateY(-5px) scale(1.05) !important;
+            animation: pulse 1s ease infinite;
+        }
+        
+        .word.matched { opacity: 0.6; pointer-events: none; filter: grayscale(0.3); }
+        
+        .final-correct-match {
+            border: 3px solid #10b981 !important;
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.95), rgba(16, 185, 129, 0.95)) !important;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.6) !important;
+        }
+        
+        .final-wrong-match {
+            border: 3px solid #ef4444 !important;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.95), rgba(239, 68, 68, 0.95)) !important;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6) !important;
+        }
+
+        /* Screen Management */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        #mainScreen {
+            text-align: center; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 25px; max-width: 90vw; width: 600px; margin: 40px auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative; z-index: 1; animation: fadeInUp 0.6s ease;
+        }
+        
+        h1 {
+            background: linear-gradient(135deg, #fff, #f0f0f0); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text; font-size: 32px;
+            margin-bottom: 25px; font-weight: 800; animation: float 3s ease-in-out infinite;
+        }
+        
+        .button-group { display: flex; justify-content: center; gap: 15px; margin: 25px 0; flex-wrap: wrap; }
+        
+        select, button {
+            padding: 14px 28px; margin: 8px 0; font-size: 16px; border: none; border-radius: 12px;
+            cursor: pointer; min-height: 52px; font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+        }
+        
+        select { background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.3); }
+        select option { background: #6366f1; color: white; }
+        
+        button {
+            background: linear-gradient(135deg, #10b981, #059669); color: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .secondary-button {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4) !important;
+        }
+        
+        .sound-button {
+            background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4) !important;
+            padding: 12px 20px !important; font-size: 15px !important; min-height: 48px !important;
+        }
+        
+        .sound-button.muted { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+
+        #timer {
+            text-align: center; color: white; font-size: 26px; font-weight: 700;
+            padding: 18px 35px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); display: inline-block;
+        }
+        
+        #result { text-align: center; color: white; font-size: 20px; margin: 20px auto; max-width: 90%; z-index: 1000; position: relative; }
+        
+        #loadingMessage {
+            text-align: center; color: white; font-size: 17px; margin: 20px 0; padding: 15px;
+            font-weight: 700; background: rgba(16, 185, 129, 0.3); backdrop-filter: blur(10px);
+            border-radius: 12px; border: 2px solid rgba(16, 185, 129, 0.5);
+        }
+        
+        .file-info {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 20px;
+            border-radius: 15px; margin: 20px 0; font-size: 15px; color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2); line-height: 1.6;
+        }
+        
+        #fileInput {
+            margin: 25px 0; padding: 25px; background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); border-radius: 15px; border: 2px dashed rgba(255, 255, 255, 0.4);
+        }
+
+        /* Language Selection */
+        .language-selector {
+            display: flex; justify-content: center; gap: 10px; margin: 15px 0;
+        }
+        .language-btn {
+            padding: 8px 16px; font-size: 14px; min-height: 40px;
+            background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .language-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #60a5fa;
+        }
+
+        /* Class Selection & Attendance */
+        .selection-container {
+            max-width: 900px; margin: 40px auto; padding: 20px;
+        }
+        .selection-container h2 {
+            text-align: center; font-size: 36px; color: white; margin-bottom: 30px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+        .class-selection, .student-list {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
+        }
+        .class-btn, .student-item {
+            padding: 20px; font-size: 18px; font-weight: bold; background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px; color: white; cursor: pointer; transition: all 0.3s;
+            text-align: center;
+        }
+        .class-btn:hover, .student-item:hover {
+            background: rgba(255, 255, 255, 0.3); transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .class-btn.selected { background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399; }
+        .student-item { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .student-item input { width: 24px; height: 24px; cursor: pointer; }
+        .student-item label { cursor: pointer; flex-grow: 1; text-align: left; }
+        
+        .game-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+            flex-wrap: wrap; gap: 15px; max-width: 1100px; margin-left: auto; margin-right: auto;
+        }
+        .game-header h2 { color: white; font-size: 24px; }
+
+        .student-display {
+            text-align: center; margin: 40px auto;
+            max-width: 800px; padding: 30px;
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border-radius: 25px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .student-display h2 {
+            font-size: 48px; margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ready-button {
+            padding: 20px 40px; font-size: 24px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            margin-top: 20px;
+        }
+
+        #footer {
+            text-align: center; padding: 20px; font-size: 16px; color: white;
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); position: fixed;
+            bottom: 0; left: 0; width: 100%; z-index: 100; font-weight: 600;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        #fullscreenBtn {
+            position: fixed; top: 15px; right: 15px; padding: 12px 20px;
+            background: rgba(99, 102, 241, 0.9); backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white;
+            cursor: pointer; z-index: 1000; font-weight: 700; font-size: 15px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        #fullscreenBtn:hover { background: rgba(139, 92, 246, 0.9); transform: scale(1.05); }
+
+        /* Modal */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(30px); margin: 8% auto;
+            padding: 40px; border: 2px solid rgba(255, 255, 255, 0.3); width: 85%; max-width: 650px;
+            border-radius: 25px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); color: white;
+        }
+
+        .modal-content h2 { color: white; border-bottom: 2px solid rgba(255, 255, 255, 0.3); padding-bottom: 15px; margin-bottom: 25px; }
+        .modal-content p, .modal-content ol { line-height: 1.8; text-align: left; }
+        .modal-content strong { color: #fbbf24; }
+        .close-button { color: rgba(255, 255, 255, 0.7); float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
+        .close-button:hover { color: white; transform: scale(1.2) rotate(90deg); }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; gap: 20px; }
+            .word-list { width: 100%; }
+            .word { font-size: 16px; padding: 15px 18px; min-height: 55px; }
+            #mainScreen, .selection-container { padding: 25px; }
+            h1 { font-size: 26px; }
+            body { padding-bottom: 100px; }
+            #footer { font-size: 13px; padding: 15px 10px; }
+            #fullscreenBtn { top: 10px; right: 10px; padding: 10px 16px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <button id="fullscreenBtn">⛶ Fullscreen</button>
+    
+    <!-- Main Screen: Excel Yükleme -->
+    <div id="mainScreen" class="screen active">
+        <h1 id="mainTitle">Smart Board Word Matching Game</h1>
+        
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="language-btn active" data-lang="en">English</button>
+            <button class="language-btn" data-lang="tr">Türkçe</button>
+            <button class="language-btn" data-lang="ar">العربية</button>
+        </div>
+        
+        <div class="file-info" id="useInfo">Usage Information: Please upload your Excel file to start the game.</div>
+        
+        <div id="fileInput">
+            <input type="file" id="excelFile" accept=".xlsx,.xls">
+            <p id="uploadTitle" style="color: white; font-weight: 600; margin-top: 10px;">Upload Excel File (A:Question, B:Answer, C:Student, D:Class)</p>
+        </div>
+        <div id="loadingMessage" style="display: none;"></div>
+        
+        <div class="button-group">
+            <button id="createGameBtn" disabled>Create Game</button>
+            <button id="infoButton" class="secondary-button">ℹ️ Information</button>
+        </div>
+    </div>
+
+    <!-- Class Selection Screen -->
+    <div id="classSelectionScreen" class="screen">
+        <div class="selection-container">
+            <h2 id="classSelectionTitle">Select Class</h2>
+            <div id="classList" class="class-selection"></div>
+        </div>
+    </div>
+
+    <!-- Attendance Screen -->
+    <div id="attendanceScreen" class="screen">
+        <div class="selection-container">
+            <h2 id="classNameTitle">Attendance</h2>
+            <div class="button-group" style="margin-bottom: 20px;">
+                <button id="selectAllBtn">Select All</button>
+                <button id="deselectAllBtn">Deselect All</button>
+            </div>
+            <div id="studentList" class="student-list"></div>
+            <div class="button-group" style="margin-top: 30px;">
+                <button id="startGameFromAttendanceBtn" disabled>Start Game</button>
+                <button id="backToClassBtn" class="secondary-button">Back</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Student Display Screen -->
+    <div id="studentDisplayScreen" class="screen">
+        <div class="student-display">
+            <h2 id="nextStudentName">Next Student</h2>
+            <button id="readyBtn" class="ready-button">Ready</button>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <h2 id="currentStudentName">Student Name</h2>
+            <div id="timer">Time: 0 seconds</div>
+            <button id="soundToggleGame" class="sound-button">🔊</button>
+        </div>
+        <div class="container">
+            <div id="questionsList" class="word-list"></div>
+            <div id="answersList" class="word-list"></div>
+        </div>
+        <div id="result"></div>
+        
+        <div class="button-group">
+            <button id="nextStudentBtn" style="display: none;">➡️ Next Student</button>
+            <button id="restartButton" class="secondary-button" style="display: none;">🏠 Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Final Results Screen -->
+    <div id="finalResultsScreen" class="screen">
+        <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); padding: 40px; border-radius: 25px; max-width: 90vw; width: 800px; margin: 40px auto; border: 1px solid rgba(255, 255, 255, 0.3);">
+            <h1 style="text-align: center; margin-bottom: 30px;">🏆 All Students Results</h1>
+            <div id="finalResultsList" style="max-height: 450px; overflow-y: auto; padding: 25px; background: rgba(255, 255, 255, 0.1); border-radius: 15px; margin: 25px 0; color: white;"></div>
+            <div class="button-group">
+                <button id="playAgainTournamentBtn">🎮 New Tournament</button>
+                <button id="backToMenuFromResultsBtn" class="secondary-button">🏠 Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeInfoModal">&times;</span>
+            <h2 id="infoModalTitle">How to Play</h2>
+            <div id="infoModalContent">
+                <p>Match questions with answers!</p>
+                <ol style="margin: 20px; line-height: 2;">
+                    <li>Upload Excel file with questions, answers, students and classes</li>
+                    <li>Select a class</li>
+                    <li>Mark attending students (attendance)</li>
+                    <li>Start the game. Students play one by one</li>
+                    <li>Click or drag words to match them</li>
+                    <li>Green = correct, Red = wrong</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="matchSound"><source src="match.mp3" type="audio/mpeg"></audio>
+    <audio id="clickSound"><source src="click.mp3" type="audio/mpeg"></audio>
+    <audio id="gameOverSound"><source src="gameover.mp3" type="audio/mpeg"></audio>
+    
+    <div id="footer">This game was created by English Teacher ABDULLAH AYDINHAN</div>
+    
+    <script>
+        // --- GLOBAL STATE ---
+        const AppState = {
+            excelData: {
+                questions: [],
+                answers: [],
+                students: [],
+                classes: []
+            },
+            allStudents: [], // { name, class }
+            selectedClass: null,
+            selectedStudents: [], // For attendance
+            currentStudentIndex: 0,
+            currentWordPairs: [], // For the matching game
+            allGameResults: [], // To store results of all students in a session
+            soundEnabled: true,
+            currentLanguage: 'en', // Default language
+            translations: {
+                en: {
+                    mainTitle: "Smart Board Word Matching Game",
+                    useInfo: "Usage Information: Please upload your Excel file to start the game.",
+                    uploadTitle: "Upload Excel File (A:Question, B:Answer, C:Student, D:Class)",
+                    createGame: "Create Game",
+                    infoButton: "Information",
+                    classSelectionTitle: "Select Class",
+                    classNameTitle: "Attendance",
+                    selectAll: "Select All",
+                    deselectAll: "Deselect All",
+                    startGame: "Start Game",
+                    back: "Back",
+                    nextStudent: "Next Student",
+                    mainMenu: "Main Menu",
+                    ready: "Ready",
+                    time: "Time",
+                    allStudentsResults: "All Students Results",
+                    newTournament: "New Tournament",
+                    gameFinished: "Game Finished!",
+                    total: "Total",
+                    correct: "Correct",
+                    wrong: "Wrong",
+                    score: "Score",
+                    infoModalTitle: "How to Play",
+                    infoModalContent: `
+                        <p>Match questions with answers!</p>
+                        <ol style="margin: 20px; line-height: 2;">
+                            <li>Upload Excel file with questions, answers, students and classes</li>
+                            <li>Select a class</li>
+                            <li>Mark attending students (attendance)</li>
+                            <li>Start the game. Students play one by one</li>
+                            <li>Click or drag words to match them</li>
+                            <li>Green = correct, Red = wrong</li>
+                        </ol>
+                    `
+                },
+                tr: {
+                    mainTitle: "Akıllı Tahta Kelime Eşleştirme Oyunu",
+                    useInfo: "Kullanım Bilgisi: Oyunu başlatmak için lütfen Excel dosyanızı yükleyin.",
+                    uploadTitle: "Excel Dosyası Yükle (A:Soru, B:Cevap, C:Öğrenci, D:Sınıf)",
+                    createGame: "Oyunu Oluştur",
+                    infoButton: "Bilgi",
+                    classSelectionTitle: "Sınıf Seçiniz",
+                    classNameTitle: "Yoklama",
+                    selectAll: "Tümünü Seç",
+                    deselectAll: "Tümünü Kaldır",
+                    startGame: "Oyuna Başla",
+                    back: "Geri",
+                    nextStudent: "Sonraki Öğrenci",
+                    mainMenu: "Ana Menü",
+                    ready: "Hazırım",
+                    time: "Süre",
+                    allStudentsResults: "Tüm Öğrencilerin Sonuçları",
+                    newTournament: "Yeni Turnuva",
+                    gameFinished: "Oyun Bitti!",
+                    total: "Toplam",
+                    correct: "Doğru",
+                    wrong: "Yanlış",
+                    score: "Puan",
+                    infoModalTitle: "Nasıl Oynanır",
+                    infoModalContent: `
+                        <p>Soruları cevaplarla eşleştirin!</p>
+                        <ol style="margin: 20px; line-height: 2;">
+                            <li>Soruları, cevapları, öğrencileri ve sınıfları içeren Excel dosyasını yükleyin</li>
+                            <li>Bir sınıf seçin</li>
+                            <li>Derse katılan öğrencileri işaretleyin (yoklama)</li>
+                            <li>Oyunu başlatın. Öğrenciler sırayla oynar</li>
+                            <li>Kelimeleri eşleştirmek için tıklayın veya sürükleyin</li>
+                            <li>Yeşil = doğru, Kırmızı = yanlış</li>
+                        </ol>
+                    `
+                },
+                ar: {
+                    mainTitle: "لعبة مطابقة الكلمات على السبورة الذكية",
+                    useInfo: "معلومات الاستخدام: يرجى تحميل ملف Excel لبدء اللعبة.",
+                    uploadTitle: "تحميل ملف Excel (أ: سؤال، ب: إجابة، ج: طالب، د: فصل)",
+                    createGame: "إنشاء لعبة",
+                    infoButton: "معلومات",
+                    classSelectionTitle: "اختر الفصل",
+                    classNameTitle: "الحضور",
+                    selectAll: "تحديد الكل",
+                    deselectAll: "إلغاء تحديد الكل",
+                    startGame: "ابدأ اللعبة",
+                    back: "رجوع",
+                    nextStudent: "الطالب التالي",
+                    mainMenu: "القائمة الرئيسية",
+                    ready: "جاهز",
+                    time: "الوقت",
+                    allStudentsResults: "نتائج جميع الطلاب",
+                    newTournament: "بطولة جديدة",
+                    gameFinished: "انتهت اللعبة!",
+                    total: "المجموع",
+                    correct: "صحيح",
+                    wrong: "خطأ",
+                    score: "الدرجة",
+                    infoModalTitle: "كيفية اللعب",
+                    infoModalContent: `
+                        <p>طابق الأسئلة مع الإجابات!</p>
+                        <ol style="margin: 20px; line-height: 2; direction: rtl;">
+                            <li>تحميل ملف Excel يحتوي على أسئلة وإجابات وطلاب وفصول</li>
+                            <li>اختر فصلاً</li>
+                            <li>حدد الطلاب الحاضرين (الحضور)</li>
+                            <li>ابدأ اللعبة. يلعب الطلاب واحدًا تلو الآخر</li>
+                            <li>انقر أو اسحب الكلمات لمطابقتها</li>
+                            <li>أخضر = صحيح، أحمر = خطأ</li>
+                        </ol>
+                    `
+                }
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const screens = {
+            main: document.getElementById('mainScreen'),
+            classSelect: document.getElementById('classSelectionScreen'),
+            attendance: document.getElementById('attendanceScreen'),
+            studentDisplay: document.getElementById('studentDisplayScreen'),
+            game: document.getElementById('gameScreen'),
+            finalResults: document.getElementById('finalResultsScreen')
+        };
+
+        // --- LANGUAGE FUNCTIONS ---
+        function setLanguage(lang) {
+            AppState.currentLanguage = lang;
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            updateUIText();
+        }
+
+        function t(key) {
+            return AppState.translations[AppState.currentLanguage][key] || key;
+        }
+
+        function updateUIText() {
+            document.getElementById('mainTitle').textContent = t('mainTitle');
+            document.getElementById('useInfo').textContent = t('useInfo');
+            document.getElementById('uploadTitle').textContent = t('uploadTitle');
+            document.getElementById('createGameBtn').textContent = t('createGame');
+            document.getElementById('infoButton').textContent = t('infoButton');
+            document.getElementById('classSelectionTitle').textContent = t('classSelectionTitle');
+            document.getElementById('classNameTitle').textContent = t('classNameTitle');
+            document.getElementById('selectAllBtn').textContent = t('selectAll');
+            document.getElementById('deselectAllBtn').textContent = t('deselectAll');
+            document.getElementById('startGameFromAttendanceBtn').textContent = t('startGame');
+            document.getElementById('backToClassBtn').textContent = t('back');
+            document.getElementById('nextStudentBtn').textContent = t('nextStudent');
+            document.getElementById('restartButton').textContent = t('mainMenu');
+            document.getElementById('readyBtn').textContent = t('ready');
+            document.getElementById('playAgainTournamentBtn').textContent = t('newTournament');
+            document.getElementById('backToMenuFromResultsBtn').textContent = t('mainMenu');
+            document.getElementById('infoModalTitle').textContent = t('infoModalTitle');
+            document.getElementById('infoModalContent').innerHTML = t('infoModalContent');
+            
+            // Update document direction for Arabic
+            document.documentElement.dir = AppState.currentLanguage === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = AppState.currentLanguage;
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function playSound(name) {
+            if (AppState.soundEnabled) {
+                const sound = document.getElementById(name + 'Sound');
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => console.error("Sound play error:", e));
+                }
+            }
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#fbbf24', '#34d399', '#f87171'];
+            for (let i = 0; i < 60; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + '%';
+                    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0%';
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 3000);
+                }, i * 25);
+            }
+        }
+
+        // --- EXCEL LOADING ---
+        async function loadExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        
+                        const questions = [], answers = [], students = [], classes = [];
+                        const uniqueClasses = new Set();
+                        const allStudentsData = [];
+
+                        json.slice(1).forEach(row => {
+                            const question = row[0] ? row[0].toString().trim() : '';
+                            const answer = row[1] ? row[1].toString().trim() : '';
+                            const studentName = row[2] ? row[2].toString().trim() : '';
+                            const className = row[3] ? row[3].toString().trim() : '';
+
+                            if (question && answer) {
+                                questions.push(question);
+                                answers.push(answer);
+                            }
+                            if (studentName && className) {
+                                students.push(studentName);
+                                classes.push(className);
+                                uniqueClasses.add(className);
+                                allStudentsData.push({ name: studentName, class: className });
+                            }
+                        });
+
+                        if (questions.length === 0 || allStudentsData.length === 0) {
+                            throw new Error("Excel dosyasında geçerli soru/cevap veya öğrenci/sınıf verisi bulunamadı.");
+                        }
+
+                        AppState.excelData = { questions, answers, students, classes: Array.from(uniqueClasses) };
+                        AppState.allStudents = allStudentsData;
+                        
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        document.getElementById('excelFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            const msg = document.getElementById('loadingMessage');
+            const createBtn = document.getElementById('createGameBtn');
+            
+            if (file) {
+                try {
+                    msg.style.display = 'block';
+                    msg.textContent = AppState.currentLanguage === 'en' ? 'Processing file...' : 
+                                     AppState.currentLanguage === 'tr' ? 'Dosya işleniyor...' : 
+                                     'معالجة الملف...';
+                    msg.style.background = 'rgba(251, 191, 36, 0.3)';
+                    msg.style.borderColor = 'rgba(251, 191, 36, 0.5)';
+                    
+                    await loadExcelFile(file);
+                    
+                    const successMsg = AppState.currentLanguage === 'en' ? 
+                                      `✅ ${AppState.excelData.questions.length} questions and ${AppState.excelData.classes.length} classes loaded!` :
+                                      AppState.currentLanguage === 'tr' ? 
+                                      `✅ ${AppState.excelData.questions.length} soru ve ${AppState.excelData.classes.length} sınıf yüklendi!` :
+                                      `✅ تم تحميل ${AppState.excelData.questions.length} سؤال و ${AppState.excelData.classes.length} فصل!`;
+                    msg.textContent = successMsg;
+                    msg.style.background = 'rgba(16, 185, 129, 0.3)';
+                    msg.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+                    createBtn.disabled = false;
+
+                } catch (error) {
+                    const errorMsg = AppState.currentLanguage === 'en' ? 
+                                    `❌ Error: ${error.message}` :
+                                    AppState.currentLanguage === 'tr' ? 
+                                    `❌ Hata: ${error.message}` :
+                                    `❌ خطأ: ${error.message}`;
+                    msg.textContent = errorMsg;
+                    msg.style.background = 'rgba(239, 68, 68, 0.3)';
+                    msg.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                    createBtn.disabled = true;
+                }
+            }
+        });
+
+        // --- SCREEN LOGIC ---
+
+        // Main Screen
+        document.getElementById('createGameBtn').addEventListener('click', () => {
+            playSound('click');
+            renderClassButtons();
+            showScreen('classSelect');
+        });
+
+        // Class Selection Screen
+        function renderClassButtons() {
+            const container = document.getElementById('classList');
+            container.innerHTML = '';
+            AppState.excelData.classes.forEach(className => {
+                const btn = document.createElement('button');
+                btn.className = 'class-btn';
+                btn.textContent = className;
+                btn.addEventListener('click', () => selectClass(className));
+                container.appendChild(btn);
+            });
+        }
+
+        function selectClass(className) {
+            playSound('click');
+            AppState.selectedClass = className;
+            document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('selected'));
+            event.target.classList.add('selected');
+            renderStudentList();
+            showScreen('attendance');
+        }
+
+        // Attendance Screen
+        function renderStudentList() {
+            const container = document.getElementById('studentList');
+            const title = document.getElementById('classNameTitle');
+            title.textContent = AppState.currentLanguage === 'en' ? `${AppState.selectedClass} Class - Attendance` :
+                               AppState.currentLanguage === 'tr' ? `${AppState.selectedClass} Sınıfı - Yoklama` :
+                               `فصل ${AppState.selectedClass} - الحضور`;
+            container.innerHTML = '';
+            
+            const studentsInClass = AppState.allStudents.filter(s => s.class === AppState.selectedClass);
+            studentsInClass.forEach(student => {
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="student-${student.name}" value="${student.name}" checked>
+                    <label for="student-${student.name}">${student.name}</label>
+                `;
+                container.appendChild(item);
+            });
+
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.addEventListener('change', updateSelectedStudents));
+            
+            // Initialize with all students selected
+            updateSelectedStudents();
+        }
+
+        function updateSelectedStudents() {
+            const checkedBoxes = document.querySelectorAll('#studentList input[type="checkbox"]:checked');
+            AppState.selectedStudents = Array.from(checkedBoxes).map(cb => cb.value);
+            document.getElementById('startGameFromAttendanceBtn').disabled = AppState.selectedStudents.length === 0;
+        }
+
+        document.getElementById('selectAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('#studentList input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateSelectedStudents();
+        });
+
+        document.getElementById('deselectAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('#studentList input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateSelectedStudents();
+        });
+
+        document.getElementById('startGameFromAttendanceBtn').addEventListener('click', () => {
+            playSound('click');
+            AppState.currentStudentIndex = 0;
+            AppState.allGameResults = [];
+            shuffleArray(AppState.selectedStudents); // Randomize the order
+            showNextStudent();
+        });
+
+        document.getElementById('backToClassBtn').addEventListener('click', () => {
+            playSound('click');
+            showScreen('classSelect');
+        });
+
+        // --- STUDENT DISPLAY ---
+        function showNextStudent() {
+            if (AppState.currentStudentIndex >= AppState.selectedStudents.length) {
+                showFinalResults();
+                return;
+            }
+
+            const currentStudent = AppState.selectedStudents[AppState.currentStudentIndex];
+            document.getElementById('nextStudentName').textContent = currentStudent;
+            showScreen('studentDisplay');
+        }
+
+        document.getElementById('readyBtn').addEventListener('click', () => {
+            playSound('click');
+            startGameForCurrentStudent();
+        });
+
+        // --- GAME LOGIC ---
+        let selectedWord = null;
+        let startTime;
+        let timerInterval;
+        let finalMatches = new Map();
+        let distractorWord = null;
+        let idCounter = 0;
+
+        function startGameForCurrentStudent() {
+            const currentStudent = AppState.selectedStudents[AppState.currentStudentIndex];
+            document.getElementById('currentStudentName').textContent = currentStudent;
+            
+            // Reset game state for the new student
+            finalMatches.clear();
+            selectedWord = null;
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('nextStudentBtn').style.display = 'none';
+            document.getElementById('restartButton').style.display = 'none';
+            
+            // Prepare word pairs for the game
+            const count = 10; // You can make this configurable
+            const availablePairs = AppState.excelData.questions.map((q, i) => ({ question: q, answer: AppState.excelData.answers[i] }));
+            shuffleArray(availablePairs);
+            AppState.currentWordPairs = availablePairs.slice(0, count);
+
+            createWordElements();
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+            
+            showScreen('game');
+        }
+
+        function createWordElements() {
+            document.getElementById('questionsList').innerHTML = '';
+            document.getElementById('answersList').innerHTML = '';
+            idCounter = 0;
+
+            const selected = [...AppState.currentWordPairs];
+            const allAnswers = AppState.excelData.answers;
+            const currentAnswers = selected.map(p => p.answer);
+            const availDist = allAnswers.filter(ans => !currentAnswers.includes(ans));
+            distractorWord = availDist.length > 0 ? availDist[Math.floor(Math.random() * availDist.length)] : 'Extra Answer';
+
+            let answersList = [...currentAnswers, distractorWord];
+            shuffleArray(selected);
+            shuffleArray(answersList);
+
+            selected.forEach((p, i) => {
+                const div = createWordElement(p.question, 'question', p.answer);
+                div.style.animationDelay = `${i * 0.05}s`;
+                document.getElementById('questionsList').appendChild(div);
+            });
+
+            answersList.forEach((ans, i) => {
+                const pair = selected.find(p => p.answer === ans);
+                const matchKey = pair ? pair.question : null;
+                const div = createWordElement(ans, 'answer', matchKey);
+                div.style.animationDelay = `${i * 0.05}s`;
+                document.getElementById('answersList').appendChild(div);
+            });
+        }
+
+        function createWordElement(word, lang, matchKey) {
+            const div = document.createElement('div');
+            div.className = 'word';
+            div.textContent = word;
+            div.dataset.lang = lang;
+            div.dataset.word = word;
+            div.dataset.matchKey = matchKey;
+            div.id = `${lang}-${++idCounter}`;
+            div.addEventListener('click', handleWordClick);
+            div.draggable = true;
+            div.addEventListener('dragstart', dragStart);
+            div.addEventListener('dragover', e => e.preventDefault());
+            div.addEventListener('drop', drop);
+            return div;
+        }
+
+        function handleWordClick(e) {
+            const word = e.target;
+            playSound('click');
+            if (word.classList.contains('matched')) return;
+
+            if (!selectedWord) {
+                selectedWord = word;
+                word.classList.add('selected');
+            } else if (selectedWord === word) {
+                selectedWord = null;
+                word.classList.remove('selected');
+            } else {
+                if (selectedWord.dataset.lang !== word.dataset.lang) {
+                    checkMatch(selectedWord, word);
+                }
+                selectedWord.classList.remove('selected');
+                word.classList.remove('selected');
+                selectedWord = null;
+            }
+        }
+
+        function dragStart(e) {
+            selectedWord = e.target;
+            e.dataTransfer.setData('text', selectedWord.dataset.matchKey);
+            e.target.classList.add('selected');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const target = e.target;
+            if (selectedWord && target.classList.contains('word') && !target.classList.contains('matched')) {
+                if (selectedWord.dataset.lang !== target.dataset.lang) {
+                    checkMatch(selectedWord, target);
+                }
+            }
+            if (selectedWord) selectedWord.classList.remove('selected');
+            selectedWord = null;
+        }
+
+        function checkMatch(w1, w2) {
+            const qEl = w1.dataset.lang === 'question' ? w1 : w2;
+            const aEl = w1.dataset.lang === 'answer' ? w1 : w2;
+            const isCorrect = qEl.dataset.matchKey === aEl.dataset.word;
+
+            finalMatches.set(qEl.id, {
+                answerId: aEl.id,
+                isCorrect: isCorrect,
+                question: qEl.dataset.word,
+                answer: aEl.dataset.word
+            });
+
+            qEl.classList.add('matched');
+            aEl.classList.add('matched');
+            playSound('match');
+            checkGameEnd();
+        }
+
+        function checkGameEnd() {
+            if (finalMatches.size === AppState.currentWordPairs.length) {
+                clearInterval(timerInterval);
+                const timeTaken = Math.round((new Date() - startTime) / 1000);
+                displayFinalResultsForStudent(timeTaken);
+                playSound('gameover');
+                createConfetti();
+            }
+        }
+
+        function displayFinalResultsForStudent(timeTaken) {
+            let correctCount = 0, wrongCount = 0;
+            finalMatches.forEach((match, qId) => {
+                const qEl = document.getElementById(qId);
+                const aEl = document.getElementById(match.answerId);
+                if (!qEl || !aEl) return;
+
+                if (match.isCorrect) {
+                    qEl.classList.add('final-correct-match');
+                    aEl.classList.add('final-correct-match');
+                    correctCount++;
+                } else {
+                    qEl.classList.add('final-wrong-match');
+                    aEl.classList.add('final-wrong-match');
+                    wrongCount++;
+                }
+                qEl.style.cursor = 'default';
+                aEl.style.cursor = 'default';
+                qEl.classList.remove('matched');
+                aEl.classList.remove('matched');
+            });
+
+            const remaining = document.querySelector('#answersList .word:not(.matched)');
+            if (remaining && remaining.dataset.word === distractorWord) {
+                remaining.classList.add('final-wrong-match');
+            }
+
+            const score = Math.round((correctCount / AppState.currentWordPairs.length) * 100);
+            const studentName = AppState.selectedStudents[AppState.currentStudentIndex];
+            const result = {
+                student: studentName,
+                class: AppState.selectedClass,
+                totalWords: AppState.currentWordPairs.length,
+                correct: correctCount,
+                wrong: wrongCount,
+                time: timeTaken,
+                score: score
+            };
+            AppState.allGameResults.push(result);
+
+            const finishedText = AppState.currentLanguage === 'en' ? 'Game Finished!' :
+                                AppState.currentLanguage === 'tr' ? 'Oyun Bitti!' :
+                                'انتهت اللعبة!';
+            const totalText = AppState.currentLanguage === 'en' ? 'Total' :
+                             AppState.currentLanguage === 'tr' ? 'Toplam' :
+                             'المجموع';
+            const correctText = AppState.currentLanguage === 'en' ? 'Correct' :
+                               AppState.currentLanguage === 'tr' ? 'Doğru' :
+                               'صحيح';
+            const wrongText = AppState.currentLanguage === 'en' ? 'Wrong' :
+                             AppState.currentLanguage === 'tr' ? 'Yanlış' :
+                             'خطأ';
+            const timeText = AppState.currentLanguage === 'en' ? 'Time' :
+                            AppState.currentLanguage === 'tr' ? 'Süre' :
+                            'الوقت';
+            const scoreText = AppState.currentLanguage === 'en' ? 'Score' :
+                             AppState.currentLanguage === 'tr' ? 'Puan' :
+                             'الدرجة';
+
+            document.getElementById('result').innerHTML = `
+                <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; margin: 25px auto; color: white; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 450px; border: 2px solid rgba(255, 255, 255, 0.3

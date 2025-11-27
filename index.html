@@ -56,7 +56,7 @@
             border-radius: 12px;
             box-shadow: 5px 5px 30px rgba(0,0,0,0.25);
             width: 500px;
-            height: 380px; /* Yükseklik biraz arttırıldı */
+            height: 380px;
             border: 1px solid #eee;
             z-index: 1060;
             overflow: hidden;
@@ -71,7 +71,7 @@
             border-right: 1px solid #eee;
             display: flex;
             flex-direction: column;
-            gap: 2px; /* Linkler arası boşluk */
+            gap: 2px;
             overflow-y: auto;
         }
 
@@ -153,7 +153,7 @@
         .icon-Videos { background-color: #dc3545; }
         .icon-Vocabulary { background-color: #198754; }
         .icon-Grammar { background-color: #fd7e14; }
-        .icon-Slides { background-color: #212529; } /* Koyu renk */
+        .icon-Slides { background-color: #212529; } 
         .icon-Documents { background-color: #0dcaf0; }
         
         .view-section { display: none; animation: fadeIn 0.5s ease; }
@@ -187,6 +187,9 @@
                 </li>
                 <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchView('about')">About</a></li>
                 <li class="nav-item ms-2"><button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button></li>
+                <li class="nav-item ms-2">
+                    <a class="nav-link text-secondary" href="admin.html" target="_blank" title="Admin Girişi"><i class="fa-solid fa-lock"></i></a>
+                </li>
             </ul>
         </div>
     </div>
@@ -202,7 +205,6 @@
             document.write(`
             <div class="grade-menu-item" onclick="quickNav('${g}', 'Games')">
                 <div class="grade-circle">${num}</div>
-                
                 <div class="grade-submenu">
                     <div class="submenu-layout">
                         <div class="submenu-links">
@@ -296,7 +298,6 @@
         renderHomeLatest(); 
     }).catch(e => console.error(e));
 
-    // --- MEGA MENU ÖNİZLEME ---
     function showPreview(grade, source) {
         const previewContainer = document.getElementById(`preview-${grade}`);
         const items = allData.filter(i => i.grade === grade && i.source === source && i.isVisible !== false).slice(0, 5);
@@ -308,7 +309,6 @@
 
         let html = `<div class="text-muted small mb-2 border-bottom pb-1">Latest in ${source}</div>`;
         items.forEach(item => {
-            // İKON SEÇİMİ (DOSYA TİPİNE GÖRE)
             let iconClass = CONFIG[item.source] ? CONFIG[item.source].icon : 'fa-file';
             if (['Vocabulary', 'Grammar', 'Slides', 'Documents'].includes(item.source)) {
                 iconClass = getFileIcon(item.name);
@@ -366,19 +366,32 @@
         renderContent();
     }
 
+    // --- YENİLENEN VİTRİN ALGORİTMASI (ADİL DAĞITIM) ---
     function renderHomeLatest() {
         const container = document.getElementById('home-showcase');
-        const allGames = allData.filter(i => i.source === 'Games');
-        const allOthers = allData.filter(i => i.source !== 'Games');
-        let showcaseItems = [];
         
-        showcaseItems.push(...allGames.slice(0, 4));
-        let needed = 10 - showcaseItems.length;
-        if(needed > 0) showcaseItems.push(...allOthers.slice(0, needed));
-        if(showcaseItems.length < 10) {
-             let remainingGames = allGames.slice(4);
-             let moreNeeded = 10 - showcaseItems.length;
-             showcaseItems.push(...remainingGames.slice(0, moreNeeded));
+        // Verileri kategorilere ayır
+        let categories = {};
+        allData.forEach(item => {
+            if(item.isVisible === false) return;
+            if(!categories[item.source]) categories[item.source] = [];
+            categories[item.source].push(item);
+        });
+
+        let showcaseItems = [];
+        let keys = Object.keys(categories);
+        let maxPerRound = 20; // Döngü sınırı (sonsuz döngüden kaçınmak için)
+        
+        // Round Robin: Her kategoriden sırayla 1 tane al
+        for(let i=0; i<maxPerRound; i++) {
+            let itemAdded = false;
+            keys.forEach(key => {
+                if(categories[key].length > 0 && showcaseItems.length < 12) { // Max 12 ürün göster
+                    showcaseItems.push(categories[key].shift()); // İlk elemanı al ve listeye ekle
+                    itemAdded = true;
+                }
+            });
+            if(!itemAdded || showcaseItems.length >= 12) break;
         }
 
         let html = "";
@@ -386,7 +399,6 @@
         container.innerHTML = html;
     }
 
-    // --- DOSYA İKONU BELİRLEME (GÜNCELLENDİ) ---
     function getFileIcon(filename) {
         if(filename.endsWith('.pdf')) return 'fa-file-pdf';
         if(filename.match(/\.(docx|doc)$/i)) return 'fa-file-word';
@@ -412,7 +424,6 @@
             bgClass = 'icon-' + item.source;
         }
         
-        // Eğer dosya tabanlı bir bölümse, özel dosya ikonu kullan
         if (['Vocabulary', 'Grammar', 'Slides', 'Documents'].includes(item.source)) {
             iconClass = getFileIcon(item.name);
         }

@@ -15,7 +15,7 @@
         .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
         .nav-link.active { color: #0d6efd !important; }
 
-        /* --- GELİŞMİŞ SOL YAN MENÜ --- */
+        /* --- GELİŞMİŞ SOL YAN MENÜ (SIDEBAR) --- */
         .left-sidebar {
             position: fixed;
             left: 0;
@@ -46,7 +46,7 @@
 
         .grade-menu-item:hover { background-color: #0d6efd; width: 70px; }
 
-        /* MEGA MENU (SUBMENU) */
+        /* MEGA MENU (SUBMENU - ÖNİZLEME ALANI) */
         .grade-submenu {
             display: none;
             position: absolute;
@@ -96,10 +96,11 @@
         .submenu-link:hover { background-color: #e9ecef; color: #0d6efd; transform: translateX(5px); }
         .submenu-link i { width: 25px; }
 
+        /* Hover ile Menüyü Aç */
         .grade-menu-item:hover .grade-submenu { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* Önizleme Kartları (Mini) */
+        /* Önizleme Listesi */
         .preview-item {
             display: flex;
             align-items: center;
@@ -120,11 +121,12 @@
         .preview-text h6 { margin: 0; font-size: 0.85rem; font-weight: 700; color: #333; }
         .preview-text small { font-size: 0.7rem; color: #888; }
 
-        /* MOBİL AYARLARI */
+        /* MOBİL UYUMLULUK */
         @media (max-width: 768px) {
             .left-sidebar { gap: 8px; }
             .grade-menu-item { width: 40px; height: 40px; font-size: 0.8rem; border-radius: 0 10px 10px 0; }
             .grade-menu-item:hover { width: 50px; }
+            /* Mobilde Mega Menüyü Gizle */
             .grade-menu-item:hover .grade-submenu { display: none !important; } 
             .grade-circle { width: 25px; height: 25px; font-size: 0.9rem; }
         }
@@ -137,7 +139,7 @@
             font-size: 1.1rem;
         }
 
-        /* ETİKET VE RENKLER */
+        /* SINIF ETİKETLERİ VE RENKLER */
         .grade-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 8px; color: white; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
         .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); }
         .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); }
@@ -148,12 +150,13 @@
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
+        /* KATEGORİ RENKLERİ */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
         .icon-Vocabulary { background-color: #198754; }
         .icon-Grammar { background-color: #fd7e14; }
-        .icon-Slides { background-color: #212529; } 
+        .icon-Slides { background-color: #212529; }
         .icon-Documents { background-color: #0dcaf0; }
         
         .view-section { display: none; animation: fadeIn 0.5s ease; }
@@ -181,7 +184,7 @@
                         <li><a class="dropdown-item" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open text-success me-2"></i> Vocabulary</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Grammar')"><i class="fa-solid fa-pen-nib text-warning me-2"></i> Grammar</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Videos')"><i class="fa-solid fa-youtube text-danger me-2"></i> Videos</a></li>
-                        <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-dark me-2"></i> Slides</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-primary me-2"></i> Slides</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Documents')"><i class="fa-solid fa-file-pdf text-info me-2"></i> Documents</a></li>
                     </ul>
                 </li>
@@ -279,6 +282,10 @@
 <div class="modal fade" id="contactModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-envelope"></i> Contact Teacher</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4 text-center"><i class="fa-solid fa-paper-plane fa-3x text-primary mb-3"></i><p class="fs-5">Hello! Do you have any questions?</p><p class="text-muted">Feel free to send me an email.</p><div class="alert alert-light border mt-3"><strong><i class="fa-solid fa-at"></i> Email:</strong><br><a href="mailto:abdullahaydınhan@gmail.com" class="text-decoration-none fw-bold text-break">abdullahaydınhan@gmail.com</a></div></div><div class="modal-footer border-0 justify-content-center pb-4"><button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button></div></div></div></div>
 
 <script>
+    // --- KİMLİK BİLGİLERİ (GÜVENLİ) ---
+    const GITHUB_USERNAME = "abdullahaydinhan"; 
+    const REPO_NAME = "englishgamehub"; 
+
     let allData = [];
     let currentMode = 'home'; 
     let currentGrade = '9TH_GRADE';
@@ -366,7 +373,7 @@
         renderContent();
     }
 
-    // --- YENİLENEN VİTRİN ALGORİTMASI (ADİL DAĞITIM) ---
+    // --- ADİL VİTRİN ALGORİTMASI (ROUND ROBIN) ---
     function renderHomeLatest() {
         const container = document.getElementById('home-showcase');
         
@@ -380,14 +387,14 @@
 
         let showcaseItems = [];
         let keys = Object.keys(categories);
-        let maxPerRound = 20; // Döngü sınırı (sonsuz döngüden kaçınmak için)
+        let maxPerRound = 20; 
         
-        // Round Robin: Her kategoriden sırayla 1 tane al
+        // Her kategoriden sırayla 1 tane al (Oyun, Video, Slayt...)
         for(let i=0; i<maxPerRound; i++) {
             let itemAdded = false;
             keys.forEach(key => {
-                if(categories[key].length > 0 && showcaseItems.length < 12) { // Max 12 ürün göster
-                    showcaseItems.push(categories[key].shift()); // İlk elemanı al ve listeye ekle
+                if(categories[key].length > 0 && showcaseItems.length < 12) { 
+                    showcaseItems.push(categories[key].shift()); 
                     itemAdded = true;
                 }
             });

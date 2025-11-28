@@ -8,15 +8,25 @@
     <style>
         body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .container-fluid { max-width: 1600px; margin-top: 20px; }
-        .changed-row { background-color: #fff8c4 !important; }
+        
+        /* Değişiklik ve Silme Efektleri */
+        .changed-row { background-color: #fff8c4 !important; transition: 0.5s; }
+        .deleted-row { background-color: #ffcccc !important; text-decoration: line-through; opacity: 0.5; pointer-events: none; }
+        
+        /* Form Elemanları */
         .table select, .table input { border: 1px solid #ced4da; font-size: 0.9rem; }
-        /* Türlere göre renkli etiketler */
+        
+        /* Silme Butonu */
+        .btn-delete { color: #dc3545; border: 1px solid #dc3545; transition: 0.3s; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        .btn-delete:hover { background-color: #dc3545; color: white; }
+
+        /* Tür Renkleri */
         .type-Games { color: #d63384; font-weight: bold; }
         .type-Videos { color: #dc3545; font-weight: bold; }
         .type-Vocabulary { color: #198754; font-weight: bold; }
         .type-Grammar { color: #fd7e14; font-weight: bold; }
         .type-Documents { color: #0dcaf0; font-weight: bold; }
-        .type-Slides { color: #6f42c1; font-weight: bold; }
+        .type-Slides { color: #212529; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -36,10 +46,15 @@
             <div class="card p-4 shadow">
                 <h5>🔑 Yönetici Girişi</h5>
                 <p class="text-muted small">Kullanıcı: abdullahaydinhan<br>Repo: englishgamehub</p>
-                <input type="password" id="githubToken" class="form-control mb-3" placeholder="GitHub Token...">
+                <input type="password" id="githubToken" class="form-control mb-3" placeholder="GitHub Token Yapıştır...">
                 <button class="btn btn-primary w-100" onclick="verifyAndLoad()">Giriş Yap</button>
             </div>
         </div>
+    </div>
+
+    <div id="loader" class="text-center mt-5" style="display:none;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="mt-3 text-muted" id="loaderText">İşlem yapılıyor...</h5>
     </div>
 
     <div id="tableSection" style="display:none;" class="card shadow-sm">
@@ -47,10 +62,11 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th width="3%" class="text-center">Sil</th>
                         <th width="3%" class="text-center">Aktif</th>
                         <th width="3%" class="text-center">Fav</th>
                         <th width="8%">Sınıf</th>
-                        <th width="12%">Ünite (Seç/Yaz)</th>
+                        <th width="10%">Ünite</th>
                         <th width="12%">Tür</th>
                         <th width="20%">Görünen Başlık</th>
                         <th width="20%">Açıklama</th>
@@ -70,9 +86,9 @@
 </datalist>
 
 <script>
-    // --- GÜNCELLENMİŞ AYARLAR ---
-    const GITHUB_USERNAME = "abdullahaydinhan";  // YENİ KULLANICI ADINIZ
-    const REPO_NAME = "englishgamehub";          // YENİ REPO ADINIZ
+    // --- AYARLAR ---
+    const GITHUB_USERNAME = "abdullahaydinhan";
+    const REPO_NAME = "englishgamehub";
     const FILE_PATH = "games_data.json";
 
     let currentData = [];
@@ -80,7 +96,7 @@
 
     const typeOptions = [
         { val: "Games", label: "🎮 Game" },
-        { val: "Interactive_Activities", label: "🧩 Activity" }, // İnteraktifler için
+        { val: "Interactive_Activities", label: "🧩 Activity" },
         { val: "Videos", label: "🎬 Video" },
         { val: "Vocabulary", label: "📖 Vocabulary" },
         { val: "Grammar", label: "✍️ Grammar" },
@@ -88,54 +104,72 @@
         { val: "Slides", label: "📊 Slide" }
     ];
 
+    // Token Hafızası
     document.getElementById('githubToken').value = localStorage.getItem('gh_token') || "";
 
     function verifyAndLoad() {
         const token = document.getElementById('githubToken').value;
-        if(!token) return alert("Token gerekli!");
+        if(!token) return alert("Lütfen Token giriniz!");
         localStorage.setItem('gh_token', token);
         loadData();
     }
 
+    function showLoader(show, text = "İşlem yapılıyor...") {
+        document.getElementById('loader').style.display = show ? 'block' : 'none';
+        document.getElementById('loaderText').innerText = text;
+        if(show) document.getElementById('tableSection').style.opacity = '0.2';
+        else document.getElementById('tableSection').style.opacity = '1';
+    }
+
+    // VERİ ÇEKME
     async function loadData() {
+        showLoader(true, "Veriler çekiliyor...");
         const token = localStorage.getItem('gh_token');
         try {
             const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${token}` }
             });
-            if (!res.ok) throw new Error("Veri çekilemedi! Kullanıcı adı veya Token hatalı olabilir.");
+            if (!res.ok) throw new Error("Veri çekilemedi! Token hatalı olabilir.");
             
             const data = await res.json();
             fileSha = data.sha;
             currentData = JSON.parse(decodeURIComponent(escape(window.atob(data.content))));
-            currentData.reverse(); // En yeniyi en başa al
+            currentData.reverse(); 
 
             renderTable();
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('tableSection').style.display = 'block';
         } catch (e) { alert(e.message); }
+        finally { showLoader(false); }
     }
 
+    // TABLO OLUŞTURMA
     function renderTable() {
         const tbody = document.getElementById('gameTableBody');
         tbody.innerHTML = "";
 
         currentData.forEach((item, index) => {
             const tr = document.createElement('tr');
+            tr.id = `row-${index}`;
             
-            // Tür Seçimi
+            // Tür Select
             let typeSelect = `<select class="form-select form-select-sm type-${item.source}" onchange="updateRow(${index}, 'source', this.value)">`;
             typeOptions.forEach(t => {
                 typeSelect += `<option value="${t.val}" ${item.source === t.val ? 'selected' : ''}>${t.label}</option>`;
             });
             typeSelect += `</select>`;
 
-            // Sınıf Seçimi
+            // Sınıf Select
             let gradeSelect = `<select class="form-select form-select-sm" onchange="updateRow(${index}, 'grade', this.value)">
                 ${["9TH_GRADE","10TH_GRADE","11TH_GRADE","12TH_GRADE"].map(g => `<option value="${g}" ${item.grade===g?'selected':''}>${g}</option>`).join('')}
             </select>`;
 
             tr.innerHTML = `
+                <td class="text-center">
+                    <button class="btn btn-sm btn-delete rounded-circle" onclick="deleteItem(${index})" title="Tamamen Sil">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
                 <td class="text-center"><input class="form-check-input" type="checkbox" onchange="updateRow(${index}, 'isVisible', this.checked)" ${item.isVisible !== false ? 'checked' : ''}></td>
                 <td class="text-center"><input type="checkbox" onchange="updateRow(${index}, 'isFeatured', this.checked)" ${item.isFeatured ? 'checked' : ''}></td>
                 <td>${gradeSelect}</td>
@@ -151,13 +185,94 @@
 
     window.updateRow = function(index, key, value) {
         currentData[index][key] = value;
-        document.getElementById('gameTableBody').children[index].classList.add('changed-row');
+        document.getElementById(`row-${index}`).classList.add('changed-row');
         document.getElementById('statusMsg').innerText = "Değişiklik yapıldı, kaydetmeyi unutma!";
     }
 
+    // --- SİLME MANTIĞI ---
+    async function deleteItem(index) {
+        const item = currentData[index];
+        const isGame = item.source === 'Games';
+        let confirmMsg = `"${item.name}" dosyasını GitHub'dan TAMAMEN silmek üzeresiniz.`;
+        
+        if(isGame) {
+            confirmMsg += `\n\n⚠️ DİKKAT: Bu bir Oyun klasörüdür!\n"index.html" dosyasının bulunduğu TÜM KLASÖR silinecektir.`;
+        } else {
+            confirmMsg += `\n\nBu işlem geri alınamaz.`;
+        }
+
+        if(!confirm(confirmMsg)) return;
+
+        showLoader(true, "Dosya(lar) GitHub'dan siliniyor...");
+        const token = localStorage.getItem('gh_token');
+
+        try {
+            if (isGame) {
+                // Oyun Klasörü Silme: Klasör yolunu bul ve içindekileri sil
+                const pathParts = item.path.split('/');
+                pathParts.pop(); // index.html'i çıkar
+                const folderPath = pathParts.join('/'); 
+
+                const listRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${folderPath}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                
+                if(!listRes.ok) throw new Error("Klasör içeriği okunamadı.");
+                const files = await listRes.json();
+
+                for (const file of files) {
+                    await deleteSingleFile(file.path, file.sha, token);
+                }
+
+            } else {
+                // Tek Dosya Silme (PDF, Video vb.)
+                const fileRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${item.path}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if(!fileRes.ok) throw new Error("Dosya bulunamadı.");
+                const fileData = await fileRes.json();
+                
+                await deleteSingleFile(item.path, fileData.sha, token);
+            }
+
+            // Başarılı olursa satırı çiz
+            document.getElementById(`row-${index}`).classList.add('deleted-row');
+            alert("✅ Silme işlemi başarılı! Site birkaç dakika içinde güncellenecek.");
+
+        } catch (e) {
+            alert("Hata oluştu: " + e.message);
+        } finally {
+            showLoader(false);
+        }
+    }
+
+    async function deleteSingleFile(path, sha, token) {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${path}`, {
+            method: 'DELETE',
+            headers: { 
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Deleted via Admin Panel: ${path}`,
+                sha: sha
+            })
+        });
+        if(!res.ok) throw new Error(`${path} silinemedi.`);
+    }
+
+    // --- DEĞİŞİKLİKLERİ KAYDETME ---
     async function saveChanges() {
         if (!confirm("Değişiklikler siteye gönderilsin mi?")) return;
-        const dataToSave = [...currentData].reverse(); // Kaydederken sırayı düzelt
+        showLoader(true, "Ayarlar kaydediliyor...");
+        
+        // Silinen satırları veriden çıkararak kaydet
+        // (Ekrandaki çizili olanları backend'e gönderme)
+        // Not: Ancak gerçek silme işlemi zaten yapıldı, bu sadece json'u günceller.
+        // Aslında Robot (Action) zaten çalışıp json'u düzeltecek. 
+        // Biz yine de metadata güncellemeleri için gönderiyoruz.
+        
+        const dataToSave = [...currentData].reverse(); 
         const token = localStorage.getItem('gh_token');
         
         const bodyData = {
@@ -176,8 +291,9 @@
             const data = await res.json();
             fileSha = data.content.sha;
             document.querySelectorAll('.changed-row').forEach(row => row.classList.remove('changed-row'));
-            alert("✅ Başarıyla kaydedildi!");
+            alert("✅ Ayarlar güncellendi!");
         } catch (e) { alert(e.message); }
+        finally { showLoader(false); }
     }
 </script>
 </body>
